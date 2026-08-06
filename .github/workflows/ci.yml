@@ -19,8 +19,6 @@ jobs:
   # typecheck and test jobs — .dist output is Node-independent, so there is no
   # need to rebuild it per matrix entry. .dist is a dotfile dir, so the upload
   # must opt into hidden files or the artifact comes back empty.
-  # if-no-files-found is warn (not error) while the workspace is empty; flip it
-  # to error once the first package lands.
   build:
     name: Build
     runs-on: ubuntu-latest
@@ -33,7 +31,7 @@ jobs:
         with:
           name: dist
           include-hidden-files: true
-          if-no-files-found: warn
+          if-no-files-found: error
           retention-days: 1
           path: |
             packages/*/.dist
@@ -70,9 +68,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: dist
-        # The build uploads no artifact while the workspace is empty; drop
-        # continue-on-error alongside the if-no-files-found flip.
-        continue-on-error: true
       - run: pnpm typecheck
 
   # Only the tests exercise runtime behaviour, so they alone fan out across the
@@ -94,7 +89,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: dist
-        continue-on-error: true
       - run: pnpm test
 
   # A single aggregated coverage pass on the pinned Node version — the matrix
@@ -112,7 +106,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: dist
-        continue-on-error: true
       - run: pnpm coverage
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5

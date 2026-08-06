@@ -4,7 +4,9 @@
   "commit": false,
   "access": "public",
   "baseBranch": "main",
-  "fixed": [],
+  "fixed": [
+    ["crucible", "@crucible/core", "@crucible/kit", "@crucible/schema"]
+  ],
   "linked": [],
   "updateInternalDependencies": "patch",
   "ignore": []

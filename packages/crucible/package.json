@@ -1,0 +1,37 @@
+{
+  "name": "crucible",
+  "version": "0.0.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zoobzio/crucible.git",
+    "directory": "packages/crucible"
+  },
+  "type": "module",
+  "main": "./.dist/index.mjs",
+  "types": "./.dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./.dist/index.d.ts",
+      "import": "./.dist/index.mjs"
+    },
+    "./kit": {
+      "types": "./.dist/kit.d.ts",
+      "import": "./.dist/kit.mjs"
+    }
+  },
+  "files": [
+    ".dist"
+  ],
+  "scripts": {
+    "build": "unbuild",
+    "stub": "unbuild --stub",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@crucible/core": "workspace:*",
+    "@crucible/kit": "workspace:*",
+    "@crucible/schema": "workspace:*"
+  }
+}

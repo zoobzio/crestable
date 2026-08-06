@@ -48,6 +48,32 @@ importers:
         specifier: ^4.1.8
         version: 4.1.10(@vitest/coverage-v8@4.1.10)(vite@8.2.0(jiti@2.7.0))
 
+  packages/core:
+    dependencies:
+      '@crucible/schema':
+        specifier: workspace:*
+        version: link:../schema
+
+  packages/crucible:
+    dependencies:
+      '@crucible/core':
+        specifier: workspace:*
+        version: link:../core
+      '@crucible/kit':
+        specifier: workspace:*
+        version: link:../kit
+      '@crucible/schema':
+        specifier: workspace:*
+        version: link:../schema
+
+  packages/kit:
+    dependencies:
+      '@crucible/schema':
+        specifier: workspace:*
+        version: link:../schema
+
+  packages/schema: {}
+
 packages:
 
   '@babel/code-frame@8.0.0':
