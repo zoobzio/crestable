@@ -5,8 +5,17 @@ export interface UserEvents<Meta> {
   /** User state was established, replaced, or cleared. */
   change: User<Meta> | null;
 
-  /** A `can()` check failed — missing scopes or no authenticated user. */
-  denied: { scopes: string[]; user: User<Meta> | null };
+  /**
+   * An authorization check failed. `check` says which kind: a `can()` scope
+   * check (the user was missing at least one) or an `is()` role check (the
+   * user held none of them). `required` is what was asked; `user` is `null`
+   * when unauthenticated.
+   */
+  denied: {
+    check: "scope" | "role";
+    required: string[];
+    user: User<Meta> | null;
+  };
 }
 
 export interface UsersOptions<Meta, Credentials, Context> {
@@ -32,10 +41,16 @@ export interface Users<Meta, Credentials = void, Context = unknown> {
   readonly stale: boolean;
 
   /**
-   * Whether the current user holds every given scope. Emits `denied` when
-   * the answer is no.
+   * Whether the current user holds every given scope (conjunctive — all are
+   * required). Emits `denied` when the answer is no.
    */
   can(...scopes: string[]): boolean;
+
+  /**
+   * Whether the current user holds any of the given roles (disjunctive —
+   * any one suffices). Emits `denied` when the answer is no.
+   */
+  is(...roles: string[]): boolean;
 
   /**
    * Establish the current user from ambient context via the provider. The

@@ -11,6 +11,7 @@ type Credentials = { token: string };
 const ada: User<Meta> = {
   id: "user-1",
   scopes: ["docs:read", "docs:write"],
+  roles: ["editor"],
   meta: { name: "Ada" },
 };
 
@@ -164,7 +165,8 @@ describe("can", () => {
 
     expect(users.can("docs:read", "admin")).toBe(false);
     expect(onDenied).toHaveBeenCalledWith({
-      scopes: ["docs:read", "admin"],
+      check: "scope",
+      required: ["docs:read", "admin"],
       user: ada,
     });
   });
@@ -176,7 +178,45 @@ describe("can", () => {
 
     expect(users.can("docs:read")).toBe(false);
     expect(onDenied).toHaveBeenCalledWith({
-      scopes: ["docs:read"],
+      check: "scope",
+      required: ["docs:read"],
+      user: null,
+    });
+  });
+});
+
+describe("is", () => {
+  it("grants when the user holds any of the roles", async () => {
+    const users = defineUsers({ provider: fakeProvider() });
+    await users.resolve();
+
+    expect(users.is("editor")).toBe(true);
+    expect(users.is("admin", "editor")).toBe(true);
+  });
+
+  it("denies when the user holds none and emits the denial", async () => {
+    const users = defineUsers({ provider: fakeProvider() });
+    await users.resolve();
+    const onDenied = vi.fn();
+    users.on("denied", onDenied);
+
+    expect(users.is("admin", "owner")).toBe(false);
+    expect(onDenied).toHaveBeenCalledWith({
+      check: "role",
+      required: ["admin", "owner"],
+      user: ada,
+    });
+  });
+
+  it("denies when unauthenticated", () => {
+    const users = defineUsers({ provider: fakeProvider() });
+    const onDenied = vi.fn();
+    users.on("denied", onDenied);
+
+    expect(users.is("editor")).toBe(false);
+    expect(onDenied).toHaveBeenCalledWith({
+      check: "role",
+      required: ["editor"],
       user: null,
     });
   });

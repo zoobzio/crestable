@@ -9,6 +9,7 @@ interface Meta {
 const ada: User<Meta> = {
   id: "user-1",
   scopes: ["docs:read"],
+  roles: ["editor"],
   meta: { plan: "pro" },
 };
 

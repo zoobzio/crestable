@@ -19,6 +19,7 @@ describe("crucible", () => {
       resolve: async () => ({
         id: "user-1",
         scopes: ["docs:read"],
+        roles: ["editor"],
         meta: { name: "Ada" },
       }),
     });
@@ -27,5 +28,7 @@ describe("crucible", () => {
     await users.resolve();
     expect(users.can("docs:read")).toBe(true);
     expect(users.can("docs:write")).toBe(false);
+    expect(users.is("editor")).toBe(true);
+    expect(users.is("admin")).toBe(false);
   });
 });

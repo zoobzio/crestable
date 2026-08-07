@@ -50,7 +50,14 @@ export const defineUsers = <Meta, Credentials = void, Context = unknown>(
       const user = current;
       const granted =
         user !== null && scopes.every((scope) => user.scopes.includes(scope));
-      if (!granted) emit("denied", { scopes, user });
+      if (!granted) emit("denied", { check: "scope", required: scopes, user });
+      return granted;
+    },
+    is(...roles) {
+      const user = current;
+      const granted =
+        user !== null && roles.some((role) => user.roles.includes(role));
+      if (!granted) emit("denied", { check: "role", required: roles, user });
       return granted;
     },
     async resolve(ctx) {

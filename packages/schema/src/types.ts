@@ -9,9 +9,32 @@ export interface User<Meta> {
   id: string;
 
   /**
-   * Granted scopes — the authorization surface `can()` checks against.
+   * Email address, when the provider supplies one.
+   */
+  email?: string;
+
+  /**
+   * Human-readable display name, when the provider supplies one.
+   */
+  displayName?: string;
+
+  /**
+   * Account status as reported by the provider (e.g. "active",
+   * "suspended"). Crucible does not interpret it.
+   */
+  status?: string;
+
+  /**
+   * Granted scopes — the fine-grained authorization surface `can()` checks
+   * against. Effective for the context the user was resolved in.
    */
   scopes: string[];
+
+  /**
+   * Assigned roles — coarse-grained authorization, a peer of scopes.
+   * Effective for the context the user was resolved in.
+   */
+  roles: string[];
 
   /**
    * Epoch-milliseconds timestamp after which the session is considered

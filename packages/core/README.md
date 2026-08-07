@@ -13,7 +13,8 @@ const users = defineUsers({ provider });
 
 await users.resolve();     // establish the user from ambient context
 users.current;             // User<Meta> | null
-users.can("docs:write");   // scope check; emits "denied" on failure
+users.can("docs:write");   // scope check (all required); emits "denied"
+users.is("admin");         // role check (any of); emits "denied"
 users.stale;               // expiresAt passed? reported, never acted on
 users.on("change", (u) => { ... });
 ```
