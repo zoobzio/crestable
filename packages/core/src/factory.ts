@@ -1,14 +1,13 @@
-import type { UsersOptions, UserEvents, Users } from "./types";
+import type { UsersOptions, UsersState, UserEvents, Users } from "./types";
 import type { User } from "@crucible/schema";
 
 import { assertUser } from "@crucible/schema";
 
 export const defineUsers = <Meta, Credentials = void, Context = unknown>(
   options: UsersOptions<Meta, Credentials, Context>,
+  state: UsersState<Meta> = { current: null },
 ): Users<Meta, Credentials, Context> => {
   const { provider } = options;
-
-  let current: User<Meta> | null = null;
 
   const handlers: {
     [Event in keyof UserEvents<Meta>]: Set<
@@ -28,33 +27,34 @@ export const defineUsers = <Meta, Credentials = void, Context = unknown>(
 
   function set(user: User<Meta> | null): User<Meta> | null {
     if (user !== null) assertUser(user);
-    const changed = user !== current;
-    current = user;
-    if (changed) emit("change", current);
-    return current;
+    const changed = user !== state.current;
+    state.current = user;
+    if (changed) emit("change", state.current);
+    return state.current;
   }
 
   return {
     get current() {
-      return current;
+      return state.current;
     },
     get authenticated() {
-      return current !== null;
+      return state.current !== null;
     },
     get stale() {
       return (
-        current?.expiresAt !== undefined && current.expiresAt <= Date.now()
+        state.current?.expiresAt !== undefined &&
+        state.current.expiresAt <= Date.now()
       );
     },
     can(...scopes) {
-      const user = current;
+      const user = state.current;
       const granted =
         user !== null && scopes.every((scope) => user.scopes.includes(scope));
       if (!granted) emit("denied", { check: "scope", required: scopes, user });
       return granted;
     },
     is(...roles) {
-      const user = current;
+      const user = state.current;
       const granted =
         user !== null && roles.some((role) => user.roles.includes(role));
       if (!granted) emit("denied", { check: "role", required: roles, user });
@@ -70,12 +70,14 @@ export const defineUsers = <Meta, Credentials = void, Context = unknown>(
       return user === null ? null : set(user);
     },
     async logout() {
-      if (current !== null) await provider.logout(current);
+      if (state.current !== null) await provider.logout(state.current);
       set(null);
     },
     async refresh() {
-      if (current === null || provider.refresh === undefined) return current;
-      return set(await provider.refresh(current));
+      if (state.current === null || provider.refresh === undefined) {
+        return state.current;
+      }
+      return set(await provider.refresh(state.current));
     },
     on(event, handler) {
       handlers[event].add(handler);

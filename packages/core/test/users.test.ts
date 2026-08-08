@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { Provider, User } from "@crucible/schema";
+import type { UsersState } from "../src/index";
 import { defineUsers } from "../src/index";
 
 interface Meta {
@@ -25,6 +26,29 @@ function fakeProvider(
     ...overrides,
   };
 }
+
+describe("state", () => {
+  it("mutates a caller-owned state object in place", async () => {
+    const state: UsersState<Meta> = { current: null };
+    const users = defineUsers({ provider: fakeProvider() }, state);
+
+    await users.resolve();
+    // The owner of the object sees the change without going through the
+    // service — this is what lets Nuxt back the state with useState.
+    expect(state.current).toEqual(ada);
+
+    await users.logout();
+    expect(state.current).toBeNull();
+  });
+
+  it("seeds the current user from the passed-in state", () => {
+    const state: UsersState<Meta> = { current: ada };
+    const users = defineUsers({ provider: fakeProvider() }, state);
+
+    expect(users.current).toEqual(ada);
+    expect(users.authenticated).toBe(true);
+  });
+});
 
 describe("resolve", () => {
   it("establishes state from the provider and emits change", async () => {

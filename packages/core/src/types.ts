@@ -23,6 +23,16 @@ export interface UsersOptions<Meta, Credentials, Context> {
 }
 
 /**
+ * The service's mutable state. `defineUsers` mutates this object in place and
+ * never reads it any other way, so a caller that owns the object controls the
+ * state — pass a reactive one (e.g. a Nuxt `useState` value) and the mutations
+ * are tracked. Omit it and the service creates its own plain object.
+ */
+export interface UsersState<Meta> {
+  current: User<Meta> | null;
+}
+
+/**
  * The user service: holds current user state, answers authorization checks,
  * and delegates every authentication touchpoint to its provider.
  */
