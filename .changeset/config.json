@@ -5,7 +5,13 @@
   "access": "public",
   "baseBranch": "main",
   "fixed": [
-    ["crucible", "@crucible/core", "@crucible/kit", "@crucible/schema"]
+    [
+      "crucible",
+      "@crucible/core",
+      "@crucible/kit",
+      "@crucible/schema",
+      "@crucible/nuxt"
+    ]
   ],
   "linked": [],
   "updateInternalDependencies": "patch",

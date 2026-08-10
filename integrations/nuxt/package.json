@@ -1,0 +1,44 @@
+{
+  "name": "@crucible/nuxt",
+  "version": "0.0.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zoobzio/crucible.git",
+    "directory": "integrations/nuxt"
+  },
+  "type": "module",
+  "main": "./.dist/module.mjs",
+  "types": "./.dist/module.d.ts",
+  "exports": {
+    ".": {
+      "types": "./.dist/module.d.ts",
+      "import": "./.dist/module.mjs"
+    },
+    "./server": {
+      "types": "./.dist/server/handlers.d.ts",
+      "import": "./.dist/server/handlers.mjs"
+    },
+    "./constant": {
+      "types": "./.dist/constant.d.ts",
+      "import": "./.dist/constant.mjs"
+    }
+  },
+  "files": [
+    ".dist"
+  ],
+  "scripts": {
+    "build": "unbuild",
+    "stub": "unbuild --stub",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@nuxt/kit": "^4.4.6",
+    "crucible": "workspace:*",
+    "h3": "^1.15.11"
+  },
+  "devDependencies": {
+    "@nuxt/schema": "^4.4.6"
+  }
+}
