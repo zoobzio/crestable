@@ -24,5 +24,8 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
+  },
+  "dependencies": {
+    "objectively": "^0.1.1"
   }
 }

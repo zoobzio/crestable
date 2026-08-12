@@ -1,9 +1,25 @@
-import type { Provider, User } from "@crucible/schema";
+import type { Contract, Meta, Role, Scope, User } from "@crucible/schema";
 
-/** Events a user service emits. Subscribe with {@link Users.on}. */
-export interface UserEvents<Meta> {
-  /** User state was established, replaced, or cleared. */
-  change: User<Meta> | null;
+/** Events the service emits. Subscribe with {@link Crucible.on}. */
+export interface Events<C extends Contract> {
+  /**
+   * User state was written: established, replaced, mutated in place, or
+   * cleared. Fires once per committed write — a rejected write never fires.
+   */
+  change: User<Meta<C>> | null;
+
+  /**
+   * A login flow established a user: `login()` returned with state newly
+   * assigned. An out-of-band flow that leaves state untouched does not
+   * fire — `resolve()` picks the session up when the flow returns.
+   */
+  login: User<Meta<C>>;
+
+  /**
+   * The session was torn down by `logout()`; the payload is the user that
+   * left. Does not fire when already unauthenticated.
+   */
+  logout: User<Meta<C>>;
 
   /**
    * An authorization check failed. `check` says which kind: a `can()` scope
@@ -13,38 +29,27 @@ export interface UserEvents<Meta> {
    */
   denied: {
     check: "scope" | "role";
-    required: string[];
-    user: User<Meta> | null;
+    required: Scope<C>[] | Role<C>[];
+    user: User<Meta<C>> | null;
   };
 }
 
-export interface UsersOptions<Meta, Credentials, Context> {
-  provider: Provider<Meta, Credentials, Context>;
-}
-
 /**
- * The service's mutable state. `defineUsers` mutates this object in place and
- * never reads it any other way, so a caller that owns the object controls the
- * state — pass a reactive one (e.g. a Nuxt `useState` value) and the mutations
- * are tracked. Omit it and the service creates its own plain object.
+ * The service: holds current user state behind the schema-guarded proxy,
+ * answers authorization checks against the contract's vocabulary, and
+ * invokes its provider's callbacks with crucible's own domain objects —
+ * the guarded state and the schema. The lifecycle methods take no
+ * arguments; everything a flow needs beyond state is the provider's own.
  */
-export interface UsersState<Meta> {
-  current: User<Meta> | null;
-}
-
-/**
- * The user service: holds current user state, answers authorization checks,
- * and delegates every authentication touchpoint to its provider.
- */
-export interface Users<Meta, Credentials = void, Context = unknown> {
+export interface Crucible<C extends Contract> {
   /** The current user, or `null` when unauthenticated. */
-  readonly current: User<Meta> | null;
+  readonly current: User<Meta<C>> | null;
 
   /** The current authenticated state. */
   readonly authenticated: boolean;
 
   /**
-   * Whether the current session's `expiresAt` has passed. Crucible only
+   * Whether the current session's `expires` has passed. Crucible only
    * reports staleness — reacting to it (via `refresh` or `logout`) is the
    * consumer's call.
    */
@@ -52,42 +57,44 @@ export interface Users<Meta, Credentials = void, Context = unknown> {
 
   /**
    * Whether the current user holds every given scope (conjunctive — all are
-   * required). Emits `denied` when the answer is no.
+   * required). Scopes are the contract's own — an undeclared scope fails to
+   * compile. Emits `denied` when the answer is no.
    */
-  can(...scopes: string[]): boolean;
+  can(...scopes: Scope<C>[]): boolean;
 
   /**
    * Whether the current user holds any of the given roles (disjunctive —
-   * any one suffices). Emits `denied` when the answer is no.
+   * any one suffices). Roles are the contract's own — an undeclared role
+   * fails to compile. Emits `denied` when the answer is no.
    */
-  is(...roles: string[]): boolean;
+  is(...roles: Role<C>[]): boolean;
 
   /**
    * Establish the current user from ambient context via the provider. The
    * single authoritative path by which user state is discovered.
    */
-  resolve(ctx?: Context): Promise<User<Meta> | null>;
+  resolve(): Promise<User<Meta<C>> | null>;
 
   /**
    * Initiate authentication via the provider. Resolves to the user for
-   * direct flows, or `null` when the flow continues out-of-band — call
-   * `resolve()` when it returns.
+   * direct flows; a flow that continues out-of-band leaves state untouched
+   * — call `resolve()` when it returns.
    */
-  login(credentials: Credentials): Promise<User<Meta> | null>;
+  login(): Promise<User<Meta<C>> | null>;
 
   /** Tear down the session via the provider and clear user state. */
   logout(): Promise<void>;
 
   /**
-   * Revalidate the session via the provider. A `null` result means the
-   * session is gone and clears user state. A no-op when unauthenticated or
-   * when the provider does not implement `refresh`.
+   * Revalidate the session via the provider. Cleared state means the
+   * session is gone. A no-op when unauthenticated or when the provider does
+   * not implement `refresh`.
    */
-  refresh(): Promise<User<Meta> | null>;
+  refresh(): Promise<User<Meta<C>> | null>;
 
   /** Subscribe to a service event. Returns an unsubscribe function. */
-  on<Event extends keyof UserEvents<Meta>>(
+  on<Event extends keyof Events<C>>(
     event: Event,
-    handler: (payload: UserEvents<Meta>[Event]) => void,
+    handler: (payload: Events<C>[Event]) => void,
   ): () => void;
 }

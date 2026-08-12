@@ -1,14 +1,20 @@
-import type { Users } from "crucible";
+import type { AppContract } from "#build/types/crucible.d.ts";
+import type { Crucible } from "crucible";
 
 /**
- * The user service provided on the Nuxt app as `$users`. `Meta` is `unknown`
- * for now; deriving it from the app's provider (so `current.meta` is typed)
- * is a follow-up that needs a build-time type manifest.
+ * The active contract, derived from the build-time template the module
+ * writes from `crucible.contract` in nuxt.config.
  */
-export type AppUsers = Users<unknown>;
+export type { AppContract };
+
+/**
+ * The service provided on the Nuxt app as `$crucible`, typed by the app's
+ * own contract: scopes, roles, and meta all carry their declared literals.
+ */
+export type AppCrucible = Crucible<AppContract>;
 
 declare module "#app" {
   interface NuxtApp {
-    $users: AppUsers;
+    $crucible: AppCrucible;
   }
 }

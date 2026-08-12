@@ -14,9 +14,12 @@ export default defineBuildConfig({
   externals: [
     "#app",
     "#imports",
+    "#build/crucible.mjs",
+    "#build/types/crucible.d.ts",
     "@nuxt/kit",
     "@nuxt/schema",
     "crucible",
+    "crucible/kit",
     "h3",
   ],
   rollup: {

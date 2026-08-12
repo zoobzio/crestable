@@ -26,6 +26,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@crucible/kit": "workspace:*",
     "@crucible/schema": "workspace:*"
   }
 }

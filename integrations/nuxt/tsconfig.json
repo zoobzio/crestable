@@ -9,7 +9,9 @@
     "skipLibCheck": true,
     "paths": {
       "#app": ["./src/stubs/app.d.ts"],
-      "#imports": ["./src/stubs/imports.d.ts"]
+      "#imports": ["./src/stubs/imports.d.ts"],
+      "#build/crucible.mjs": ["./src/stubs/build/crucible.d.mts"],
+      "#build/types/crucible.d.ts": ["./src/stubs/build/types/crucible.d.ts"]
     }
   },
   "include": ["src", "test"]

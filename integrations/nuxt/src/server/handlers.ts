@@ -1,51 +1,62 @@
-import type { Provider } from "crucible";
+import type { Contract, Schema } from "crucible";
+import type { Provider } from "crucible/kit";
 import type { EventHandler, H3Event } from "h3";
 
-import { createError, defineEventHandler, getRouterParam, readBody } from "h3";
+import { defineState } from "crucible/kit";
+import { createError, defineEventHandler, getRouterParam } from "h3";
 
 /**
- * Turn a provider into the server endpoints the browser talks to. The user
- * drops one file into their Nitro server — `server/api/_crucible/[action].ts`
- * — whose default export is `defineCrucibleHandlers(provider)`; that single
- * event handler dispatches on the `action` route param to the matching
- * provider method:
+ * Turn a schema and a per-request provider constructor into the server
+ * endpoints the browser transport talks to. The user drops one file into
+ * their Nitro server — `server/api/_crucible/[action].ts` — whose default
+ * export is `defineCrucibleHandlers(schema, (event) => provider)`.
  *
- * - `session` → `resolve(event)` — read the current user from the request
- * - `login`   → `login(body)`    — begin authentication
- * - `logout`  → `logout(user)`   — tear the session down
- * - `refresh` → `refresh(user)`  — revalidate the session
+ * The constructor runs once per request with the h3 event: the event is the
+ * provider's own domain — cookies, headers, body, everything a flow needs —
+ * closed over at construction, never threaded through crucible. Each action
+ * builds a guarded per-request state, invokes the matching callback with
+ * crucible's own domain objects, and answers with the session state after
+ * the action:
  *
- * The provider's context is the h3 event, so it owns all cookie/session
- * reading and writing — crucible never touches the token. This is the only
- * piece the user must wire up; the browser-side transport that calls these
- * routes ships with the module.
+ * - `session` → `resolve` — the current user, or `null`
+ * - `login`   → `login` — the established user, or `null` for out-of-band
+ * - `logout`  → `resolve` then `logout` — always `null`
+ * - `refresh` → `resolve` then `refresh` — the revalidated user, or `null`
+ *
+ * The auth host never reaches the browser, which only ever sees these
+ * routes.
  */
-export const defineCrucibleHandlers = <Meta, Credentials = void>(
-  provider: Provider<Meta, Credentials, H3Event>,
+export const defineCrucibleHandlers = <C extends Contract>(
+  schema: Schema<C>,
+  provider: (event: H3Event) => Provider<C>,
 ): EventHandler => {
   return defineEventHandler(async (event) => {
     const action = getRouterParam(event, "action");
+    const state = defineState(schema);
+    const active = provider(event);
 
     switch (action) {
       case "session":
-        return await provider.resolve(event);
+        await active.resolve(state, schema);
+        return state.current;
 
-      case "login": {
-        const credentials = (await readBody(event)) as Credentials;
-        return await provider.login(credentials);
-      }
+      case "login":
+        await active.login(state, schema);
+        return state.current;
 
-      case "logout": {
-        const user = await provider.resolve(event);
-        if (user !== null) await provider.logout(user);
-        return { ok: true };
-      }
+      case "logout":
+        await active.resolve(state, schema);
+        if (state.current !== null) {
+          await active.logout(state, schema);
+        }
+        return null;
 
-      case "refresh": {
-        const user = await provider.resolve(event);
-        if (user === null || provider.refresh === undefined) return user;
-        return await provider.refresh(user);
-      }
+      case "refresh":
+        await active.resolve(state, schema);
+        if (state.current !== null && active.refresh !== undefined) {
+          await active.refresh(state, schema);
+        }
+        return state.current;
 
       default:
         throw createError({

@@ -66,6 +66,9 @@ importers:
 
   packages/core:
     dependencies:
+      '@crucible/kit':
+        specifier: workspace:*
+        version: link:../kit
       '@crucible/schema':
         specifier: workspace:*
         version: link:../schema
@@ -87,8 +90,15 @@ importers:
       '@crucible/schema':
         specifier: workspace:*
         version: link:../schema
+      objectively:
+        specifier: ^0.1.1
+        version: 0.1.1
 
-  packages/schema: {}
+  packages/schema:
+    dependencies:
+      objectively:
+        specifier: ^0.1.1
+        version: 0.1.1
 
 packages:
 
@@ -1614,6 +1624,9 @@ packages:
 
   nth-check@2.1.1:
     resolution: {integrity: sha512-lqjrjmaOoAnWfMmBPL+XNnynZh2+swxiX3WUE0s4yEHI6m+AwrK2UZOimIRl3X/4QctVqS8AiZjFqyOGrMXb/w==}
+
+  objectively@0.1.1:
+    resolution: {integrity: sha512-Nhj9qY2BXXpLUWLtLNXTkqf0ZlSxPzVsKiQ5r5fT2NoYqaz3DKvQoBskyWQyvpW1dMAXpWlYmevEXeFRNSSPLg==}
 
   obug@2.1.4:
     resolution: {integrity: sha512-4a+OsYv9UktOJKE+l1A4OufDgdRF9PifWj+tJnHURo/P+WOxpG4GzUFL9qCalmWauao6ogiG+QvnCovwPoyAWA==}
@@ -3741,6 +3754,8 @@ snapshots:
   nth-check@2.1.1:
     dependencies:
       boolbase: 1.0.0
+
+  objectively@0.1.1: {}
 
   obug@2.1.4: {}
 

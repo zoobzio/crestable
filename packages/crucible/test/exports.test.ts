@@ -1,34 +1,45 @@
 import { describe, expect, it } from "vitest";
-import { defineUsers, isUser } from "../src/index";
-import { defineProvider } from "../src/kit";
+import type { Provider } from "../src/kit";
+import { defineCrucible, defineSchema } from "../src/index";
+import { defineProvider, defineState } from "../src/kit";
 
 describe("crucible", () => {
   it("exposes the consumer surface at the root", () => {
-    expect(defineUsers).toBeTypeOf("function");
-    expect(isUser).toBeTypeOf("function");
+    expect(defineCrucible).toBeTypeOf("function");
+    expect(defineSchema).toBeTypeOf("function");
   });
 
-  it("exposes the provider-author surface at ./kit", () => {
+  it("exposes the provider surface at ./kit", () => {
     expect(defineProvider).toBeTypeOf("function");
+    expect(defineState).toBeTypeOf("function");
   });
 
   it("wires a provider through the service end to end", async () => {
-    const provider = defineProvider({
-      login: async () => null,
-      logout: async () => {},
-      resolve: async () => ({
-        id: "user-1",
-        scopes: ["docs:read"],
-        roles: ["editor"],
-        meta: { name: "Ada" },
-      }),
+    const schema = defineSchema({
+      scopes: ["docs:read", "docs:write"],
+      roles: ["editor", "admin"],
+      meta: {},
     });
-    const users = defineUsers({ provider });
 
-    await users.resolve();
-    expect(users.can("docs:read")).toBe(true);
-    expect(users.can("docs:write")).toBe(false);
-    expect(users.is("editor")).toBe(true);
-    expect(users.is("admin")).toBe(false);
+    const provider: Provider<(typeof schema)["base"]> = {
+      login: async () => {},
+      logout: async () => {},
+      resolve: async (state) => {
+        state.current = {
+          id: "user-1",
+          scopes: ["docs:read"],
+          roles: ["editor"],
+          meta: {},
+        };
+      },
+    };
+
+    const crucible = defineCrucible(schema, provider);
+
+    await crucible.resolve();
+    expect(crucible.can("docs:read")).toBe(true);
+    expect(crucible.can("docs:write")).toBe(false);
+    expect(crucible.is("editor")).toBe(true);
+    expect(crucible.is("admin")).toBe(false);
   });
 });

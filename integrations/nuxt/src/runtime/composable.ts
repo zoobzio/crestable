@@ -1,6 +1,9 @@
-import type { AppUsers } from "./types";
+import type { AppCrucible } from "./types";
 
 import { useNuxtApp } from "#app";
 
-/** The user service: `current`, `can`/`is`, `login`/`logout`/`refresh`. */
-export const useUsers = (): AppUsers => useNuxtApp().$users;
+/**
+ * The service, typed by the app's contract: `current`, `can`/`is`, the
+ * lifecycle, and events.
+ */
+export const useCrucible = (): AppCrucible => useNuxtApp().$crucible;

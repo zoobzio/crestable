@@ -1,37 +1,51 @@
-import type { UsersOptions, UsersState, UserEvents, Users } from "./types";
-import type { User } from "@crucible/schema";
+import type { Crucible, Events } from "./types";
+import type { Contract, Schema } from "@crucible/schema";
+import type { Provider, State } from "@crucible/kit";
 
-import { assertUser } from "@crucible/schema";
+import { defineState } from "@crucible/kit";
 
-export const defineUsers = <Meta, Credentials = void, Context = unknown>(
-  options: UsersOptions<Meta, Credentials, Context>,
-  state: UsersState<Meta> = { current: null },
-): Users<Meta, Credentials, Context> => {
-  const { provider } = options;
-
+/**
+ * Builds the runtime {@link Crucible} service over a schema and a provider.
+ *
+ * The caller-owned container is fronted by the schema-guarded state from
+ * `defineState`, so every write — by the provider, or a deep mutation from
+ * anywhere — is proven against the contract before it commits, and every
+ * committed write emits `change`. The lifecycle methods invoke the matching
+ * provider callback with the guarded state and the schema; the provider
+ * assigns what it establishes, and crucible reads the outcome back off the
+ * state.
+ *
+ * @param schema - The validation bundle derived from the app's contract.
+ * @param provider - The authentication callbacks the lifecycle delegates to.
+ * @param target - The underlying container; created when omitted. Mutated
+ *   in place, so a caller that owns the object (e.g. a reactive one) sees
+ *   every write.
+ * @returns A {@link Crucible} service bound to the container.
+ */
+export const defineCrucible = <C extends Contract>(
+  schema: Schema<C>,
+  provider: Provider<C>,
+  target: State<C> = { current: null },
+): Crucible<C> => {
   const handlers: {
-    [Event in keyof UserEvents<Meta>]: Set<
-      (payload: UserEvents<Meta>[Event]) => void
-    >;
+    [Event in keyof Events<C>]: Set<(payload: Events<C>[Event]) => void>;
   } = {
     change: new Set(),
+    login: new Set(),
+    logout: new Set(),
     denied: new Set(),
   };
 
-  function emit<Event extends keyof UserEvents<Meta>>(
+  const emit = <Event extends keyof Events<C>>(
     event: Event,
-    payload: UserEvents<Meta>[Event],
-  ): void {
+    payload: Events<C>[Event],
+  ): void => {
     for (const handler of handlers[event]) handler(payload);
-  }
+  };
 
-  function set(user: User<Meta> | null): User<Meta> | null {
-    if (user !== null) assertUser(user);
-    const changed = user !== state.current;
-    state.current = user;
-    if (changed) emit("change", state.current);
-    return state.current;
-  }
+  const state = defineState(schema, target, () => {
+    emit("change", state.current);
+  });
 
   return {
     get current() {
@@ -42,8 +56,8 @@ export const defineUsers = <Meta, Credentials = void, Context = unknown>(
     },
     get stale() {
       return (
-        state.current?.expiresAt !== undefined &&
-        state.current.expiresAt <= Date.now()
+        state.current?.expires !== undefined &&
+        state.current.expires <= Date.now()
       );
     },
     can(...scopes) {
@@ -60,24 +74,35 @@ export const defineUsers = <Meta, Credentials = void, Context = unknown>(
       if (!granted) emit("denied", { check: "role", required: roles, user });
       return granted;
     },
-    async resolve(ctx) {
-      return set(await provider.resolve(ctx));
+    async resolve() {
+      await provider.resolve(state, schema);
+      return state.current;
     },
-    async login(credentials) {
-      const user = await provider.login(credentials);
-      // null means the flow continues out-of-band (e.g. a redirect); any
-      // existing state stays untouched until resolve() runs on return.
-      return user === null ? null : set(user);
+    async login() {
+      const before = state.current;
+      await provider.login(state, schema);
+      const after = state.current;
+      if (after !== null && after !== before) {
+        emit("login", after);
+      }
+      return after;
     },
     async logout() {
-      if (state.current !== null) await provider.logout(state.current);
-      set(null);
+      const leaving = state.current;
+      if (leaving === null) {
+        return;
+      }
+      await provider.logout(state, schema);
+      if (state.current !== null) {
+        state.current = null;
+      }
+      emit("logout", leaving);
     },
     async refresh() {
-      if (state.current === null || provider.refresh === undefined) {
-        return state.current;
+      if (state.current !== null && provider.refresh !== undefined) {
+        await provider.refresh(state, schema);
       }
-      return set(await provider.refresh(state.current));
+      return state.current;
     },
     on(event, handler) {
       handlers[event].add(handler);

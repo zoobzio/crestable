@@ -1,16 +1,39 @@
 # @crucible/kit
 
-The provider-authoring toolkit. `defineProvider` is the entry point for
-implementing the [`@crucible/schema`](../schema) provider contract around a
-particular authentication API — the same path used by published integrations
-and homegrown providers alike.
+The provider-authoring toolkit. This package owns the `Provider<C>`
+interaction contract, the `Bridge` between a vendor's payloads and an app's
+contract, and `defineProvider` — the entry point published integrations
+(`@crucible/auth0`, …) and homegrown providers share.
+
+A provider is a set of callbacks over crucible's own domain objects: each
+receives the shared `State<C>` and the `Schema<C>`, and assigns
+`state.current` to hand crucible what it needs — proving vendor payloads
+with the schema at its own boundary. Everything else a flow requires —
+configuration, credentials, request context — is the provider's own,
+acquired in its own domain; crucible defines none of it.
+
+The author writes the implementation in vendor terms and never sees a
+contract; the app closes the contract with its bridge, in one call:
 
 ```ts
-import { defineProvider } from "@crucible/kit";
+// published: @crucible/auth0 — knows sessions and flows, never a contract
+export const createAuth0Provider = defineProvider<Auth0Options, Auth0Session>(
+  (options, bridge) => ({
+    login: async (state) => { ... }, // untouched state = out-of-band
+    logout: async (state) => { ... },
+    resolve: async (state) => {
+      const session = await readSession(options);
+      // The bridge is instrumented: its result is already schema-proven.
+      state.current = session ? bridge(session) : null;
+    },
+  }),
+);
 
-export const provider = defineProvider({
-  login: async (credentials: { token: string }) => { ... },
-  logout: async (user) => { ... },
-  resolve: async (ctx) => { ... },
-});
+// app: the schema pins the contract; the bridge is checked against it
+const provider = createAuth0Provider(schema, { domain, clientId }, (session) => ({
+  id: session.sub,
+  scopes: session.permissions,
+  roles: session.groups,
+  meta: { plan: session.app_metadata.plan },
+}));
 ```

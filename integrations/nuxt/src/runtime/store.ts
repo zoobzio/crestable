@@ -1,14 +1,15 @@
-import type { UsersState } from "crucible";
+import type { AppContract } from "#build/types/crucible.d.ts";
+import type { State } from "crucible/kit";
 
 import { useState } from "#imports";
 
 import { STATE_KEY } from "../constant";
 
 /**
- * The per-request state object the service is built over. Held in `useState`
- * so its `current` field survives the server→client transfer and Vue tracks
- * the in-place mutations `defineUsers` makes — the service itself stays
- * reactivity-agnostic.
+ * The per-request container the service is built over. Held in `useState`
+ * so its `current` member survives the server→client transfer and Vue
+ * tracks the in-place mutations the guarded state makes — the service
+ * itself stays reactivity-agnostic.
  */
-export const accessCrucible = <Meta>() =>
-  useState<UsersState<Meta>>(STATE_KEY, () => ({ current: null }));
+export const accessCrucible = () =>
+  useState<State<AppContract>>(STATE_KEY, () => ({ current: null }));

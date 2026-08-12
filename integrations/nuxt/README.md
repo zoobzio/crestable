@@ -1,29 +1,46 @@
 # @crucible/nuxt
 
-Nuxt module for crucible with SSR. It provides a `$users` service resolved on
-the server and hydrated on the client, the `useUsers()` composable, and the
-`defineCrucibleHandlers` server helper.
+Nuxt module for crucible with SSR. It provides a `$crucible` service
+resolved on the server and hydrated on the client, the `useCrucible()`
+composable, and the `defineCrucibleHandlers` server helper — all typed by
+the app's own contract.
 
 ## Setup
 
-Add the module:
+Declare your contract once and add the module:
 
 ```ts
+// shared/contract.ts
+export const contract = {
+  scopes: ["docs:read", "docs:write"],
+  roles: ["admin", "editor"],
+  meta: { plan: ["free", "pro"] },
+} as const;
+
 // nuxt.config.ts
+import { contract } from "./shared/contract";
+
 export default defineNuxtConfig({
   modules: ["@crucible/nuxt"],
+  crucible: { contract },
 });
 ```
 
-Write your provider (it wraps your auth API; its context is the h3 event, so
-it owns cookie/session reading), then hand it to `defineCrucibleHandlers` in
-one server route file:
+Write your provider (a set of callbacks over crucible's own domain objects
+— the h3 event is its own domain, closed over per request), then hand it to
+`defineCrucibleHandlers` in one server route file:
 
 ```ts
 // server/api/_crucible/[action].ts
-import { myProvider } from "../../providers/auth";
+import { defineSchema } from "crucible";
+import { contract } from "../../../shared/contract";
+import { createMyProvider } from "../../providers/auth";
 
-export default defineCrucibleHandlers(myProvider);
+const schema = defineSchema(contract);
+
+export default defineCrucibleHandlers(schema, (event) =>
+  createMyProvider(schema, { event }, (claims) => ({ ... })),
+);
 ```
 
 That's the whole wiring. The browser-side transport that calls these routes
@@ -33,19 +50,30 @@ ships with the module.
 
 ```vue
 <script setup lang="ts">
-const users = useUsers();
+const crucible = useCrucible();
 </script>
 
 <template>
-  <p v-if="users.authenticated">Hi, {{ users.current?.displayName }}</p>
-  <button v-if="users.can('docs:write')">Edit</button>
+  <p v-if="crucible.authenticated">Hi, {{ crucible.current?.name }}</p>
+  <button v-if="crucible.can('docs:write')">Edit</button>
 </template>
 ```
 
+`can`/`is` carry the contract's vocabulary in their types — an undeclared
+scope fails to compile in the app.
+
 ## How it works
 
-- The runtime plugin builds the core service over a `useState` object and, on
-  the server only, resolves the user so state populates before render and
-  serializes to the client — no refetch or auth flash on hydration.
-- The user's provider runs only inside the server routes; the auth host never
-  reaches the browser, which only ever sees `/api/_crucible/*`.
+- At build time the module proves the configured contract, writes it to the
+  `#build/crucible.mjs` template, and derives the `AppContract` literal type
+  — so both sides of the wire share one vocabulary and the app surface is
+  fully typed.
+- The runtime plugin derives the schema from the build contract, builds the
+  service over a `useState` container and, on the server only, resolves the
+  user so state populates before render and serializes to the client — no
+  refetch or auth flash on hydration.
+- The module's transport is itself a provider whose vendor is the app's own
+  crucible routes: every callback dials `/api/_crucible/*`, and each answer
+  is proven against the schema before it lands in state.
+- The user's provider runs only inside the server handlers, constructed per
+  request with the h3 event; the auth host never reaches the browser.

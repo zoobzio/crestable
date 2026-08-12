@@ -1,9 +1,9 @@
 // Typecheck-only stub for the Nuxt `#app` virtual module.
-import type { AppUsers } from "../runtime/types";
+import type { AppCrucible } from "../runtime/types";
 
-/** The Nuxt app instance. `$users` is added by the crucible runtime. */
+/** The Nuxt app instance. `$crucible` is added by the crucible runtime. */
 export interface NuxtApp {
-  $users: AppUsers;
+  $crucible: AppCrucible;
 }
 
 interface NuxtPluginDef {
