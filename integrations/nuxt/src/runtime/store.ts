@@ -1,5 +1,5 @@
-import type { AppContract } from "#build/types/warded.d.ts";
-import type { State } from "warded/kit";
+import type { AppContract } from "#build/types/crestable.d.ts";
+import type { State } from "crestable/kit";
 
 import { useState } from "#imports";
 
@@ -11,5 +11,5 @@ import { STATE_KEY } from "../constant";
  * tracks the in-place mutations the guarded state makes — the service
  * itself stays reactivity-agnostic.
  */
-export const accessWard = () =>
+export const accessCrest = () =>
   useState<State<AppContract>>(STATE_KEY, () => ({ current: null }));

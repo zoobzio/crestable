@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 import type { Provider } from "../src/kit";
-import { defineWard, defineSchema } from "../src/index";
+import { defineCrest, defineSchema } from "../src/index";
 import { defineProvider, defineState } from "../src/kit";
 
-describe("warded", () => {
+describe("crestable", () => {
   it("exposes the consumer surface at the root", () => {
-    expect(defineWard).toBeTypeOf("function");
+    expect(defineCrest).toBeTypeOf("function");
     expect(defineSchema).toBeTypeOf("function");
   });
 
@@ -34,12 +34,12 @@ describe("warded", () => {
       },
     };
 
-    const warded = defineWard(schema, provider);
+    const crestable = defineCrest(schema, provider);
 
-    await warded.resolve();
-    expect(warded.can("docs:read")).toBe(true);
-    expect(warded.can("docs:write")).toBe(false);
-    expect(warded.is("editor")).toBe(true);
-    expect(warded.is("admin")).toBe(false);
+    await crestable.resolve();
+    expect(crestable.can("docs:read")).toBe(true);
+    expect(crestable.can("docs:write")).toBe(false);
+    expect(crestable.is("editor")).toBe(true);
+    expect(crestable.is("admin")).toBe(false);
   });
 });

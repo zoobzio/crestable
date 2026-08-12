@@ -1,16 +1,16 @@
-import type { AppContract } from "#build/types/warded.d.ts";
+import type { AppContract } from "#build/types/crestable.d.ts";
 
-import { defineWard, defineSchema } from "warded";
+import { defineCrest, defineSchema } from "crestable";
 
 import { defineNuxtPlugin } from "#app";
-import { contract } from "#build/warded.mjs";
+import { contract } from "#build/crestable.mjs";
 
-import { accessWard } from "./store";
+import { accessCrest } from "./store";
 import { transport } from "./transport";
 
 /**
  * Builds the service once per request over the `useState`-backed container
- * and provides it as `$warded`. The schema derives from the build-time
+ * and provides it as `$crestable`. The schema derives from the build-time
  * contract, so the same vocabulary rules both sides of the wire. During SSR
  * the service resolves through the transport (which forwards the request
  * cookies to the session route), so state is populated before render and
@@ -18,18 +18,22 @@ import { transport } from "./transport";
  * it does not resolve again — no refetch, no auth flash.
  */
 export default defineNuxtPlugin({
-  name: "warded",
+  name: "crestable",
   setup: async () => {
     const schema = defineSchema(contract);
-    const state = accessWard();
-    const warded = defineWard(schema, transport<AppContract>(), state.value);
+    const state = accessCrest();
+    const crestable = defineCrest(
+      schema,
+      transport<AppContract>(),
+      state.value,
+    );
 
     if (import.meta.server) {
-      await warded.resolve();
+      await crestable.resolve();
     }
 
     return {
-      provide: { warded },
+      provide: { crestable },
     };
   },
 });

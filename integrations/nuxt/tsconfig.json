@@ -10,8 +10,8 @@
     "paths": {
       "#app": ["./src/stubs/app.d.ts"],
       "#imports": ["./src/stubs/imports.d.ts"],
-      "#build/warded.mjs": ["./src/stubs/build/warded.d.mts"],
-      "#build/types/warded.d.ts": ["./src/stubs/build/types/warded.d.ts"]
+      "#build/crestable.mjs": ["./src/stubs/build/crestable.d.mts"],
+      "#build/types/crestable.d.ts": ["./src/stubs/build/types/crestable.d.ts"]
     }
   },
   "include": ["src", "test"]

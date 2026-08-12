@@ -2,11 +2,11 @@
   "mode": "pre",
   "tag": "alpha",
   "initialVersions": {
-    "@warded/nuxt": "0.0.0",
-    "@warded/core": "0.0.0",
-    "warded": "0.0.0",
-    "@warded/kit": "0.0.0",
-    "@warded/schema": "0.0.0"
+    "@crestable/nuxt": "0.0.0",
+    "@crestable/core": "0.0.0",
+    "crestable": "0.0.0",
+    "@crestable/kit": "0.0.0",
+    "@crestable/schema": "0.0.0"
   },
   "changesets": []
 }

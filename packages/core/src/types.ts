@@ -1,6 +1,6 @@
-import type { Contract, Meta, Role, Scope, User } from "@warded/schema";
+import type { Contract, Meta, Role, Scope, User } from "@crestable/schema";
 
-/** Events the service emits. Subscribe with {@link Ward.on}. */
+/** Events the service emits. Subscribe with {@link Crest.on}. */
 export interface Events<C extends Contract> {
   /**
    * User state was written: established, replaced, mutated in place, or
@@ -37,11 +37,11 @@ export interface Events<C extends Contract> {
 /**
  * The service: holds current user state behind the schema-guarded proxy,
  * answers authorization checks against the contract's vocabulary, and
- * invokes its provider's callbacks with warded's own domain objects —
+ * invokes its provider's callbacks with crestable's own domain objects —
  * the guarded state and the schema. The lifecycle methods take no
  * arguments; everything a flow needs beyond state is the provider's own.
  */
-export interface Ward<C extends Contract> {
+export interface Crest<C extends Contract> {
   /** The current user, or `null` when unauthenticated. */
   readonly current: User<Meta<C>> | null;
 
@@ -49,7 +49,7 @@ export interface Ward<C extends Contract> {
   readonly authenticated: boolean;
 
   /**
-   * Whether the current session's `expires` has passed. Ward only
+   * Whether the current session's `expires` has passed. Crest only
    * reports staleness — reacting to it (via `refresh` or `logout`) is the
    * consumer's call.
    */

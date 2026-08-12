@@ -1,8 +1,8 @@
 # Integrations
 
-Bridges between warded and host frameworks. Each depends only on the public
-[`warded`](../packages/warded) package.
+Bridges between crestable and host frameworks. Each depends only on the public
+[`crestable`](../packages/crestable) package.
 
-| Integration              | Directory           | Description                          |
-| ------------------------ | ------------------- | ------------------------------------ |
-| [`@warded/nuxt`](./nuxt) | `integrations/nuxt` | Nuxt module with SSR user resolution |
+| Integration                 | Directory           | Description                          |
+| --------------------------- | ------------------- | ------------------------------------ |
+| [`@crestable/nuxt`](./nuxt) | `integrations/nuxt` | Nuxt module with SSR user resolution |

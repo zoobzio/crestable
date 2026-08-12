@@ -1,7 +1,7 @@
-import type { Contract } from "warded";
+import type { Contract } from "crestable";
 import type { NuxtModule } from "@nuxt/schema";
 
-import { defineSchema } from "warded";
+import { defineSchema } from "crestable";
 
 import {
   addImports,
@@ -33,23 +33,23 @@ const tuple = (values: readonly string[]): string =>
   `readonly [${values.map(literal).join(", ")}]`;
 
 /**
- * Nuxt module for warded.
+ * Nuxt module for crestable.
  *
  * At build time it validates the configured contract by deriving a schema
- * from it, writes the contract to the `warded.mjs` build template, and
- * derives the `AppContract` literal type into the `types/warded.d.ts`
+ * from it, writes the contract to the `crestable.mjs` build template, and
+ * derives the `AppContract` literal type into the `types/crestable.d.ts`
  * type template — so the runtime service, the composable, and the server
  * handlers all speak the app's own vocabulary. It registers the runtime
- * plugin (which builds the `$warded` service and resolves the user during
- * SSR), auto-imports `useWard` in the app, and auto-imports
- * `defineWardHandlers` in the Nitro server. The user writes two things:
+ * plugin (which builds the `$crestable` service and resolves the user during
+ * SSR), auto-imports `useCrest` in the app, and auto-imports
+ * `defineCrestHandlers` in the Nitro server. The user writes two things:
  * their provider, and the one route file that hands it to
- * `defineWardHandlers`.
+ * `defineCrestHandlers`.
  */
 const module: NuxtModule<ModuleOptions> = defineNuxtModule<ModuleOptions>({
   meta: {
-    name: "warded",
-    configKey: "warded",
+    name: "crestable",
+    configKey: "crestable",
   },
   setup: (options, _nuxt) => {
     const resolver = createResolver(import.meta.url);
@@ -57,7 +57,7 @@ const module: NuxtModule<ModuleOptions> = defineNuxtModule<ModuleOptions>({
     const contract = options.contract;
     if (!contract) {
       throw new Error(
-        "warded: no contract configured — set `warded.contract` in nuxt.config.",
+        "crestable: no contract configured — set `crestable.contract` in nuxt.config.",
       );
     }
 
@@ -65,23 +65,23 @@ const module: NuxtModule<ModuleOptions> = defineNuxtModule<ModuleOptions>({
     defineSchema(contract);
 
     addTemplate({
-      filename: "warded.mjs",
+      filename: "crestable.mjs",
       write: true,
       getContents: () => `export const contract = ${JSON.stringify(contract)};`,
     });
 
     addTemplate({
-      filename: "warded.d.mts",
+      filename: "crestable.d.mts",
       write: true,
       getContents: () =>
         [
-          `import type { AppContract } from "./types/warded";`,
+          `import type { AppContract } from "./types/crestable";`,
           `export declare const contract: AppContract;`,
         ].join("\n"),
     });
 
     addTypeTemplate({
-      filename: "types/warded.d.ts",
+      filename: "types/crestable.d.ts",
       write: true,
       getContents: () => {
         const meta = Object.entries(contract.meta)
@@ -105,13 +105,13 @@ const module: NuxtModule<ModuleOptions> = defineNuxtModule<ModuleOptions>({
     addPlugin(resolver.resolve("./runtime/plugin"));
 
     addImports({
-      name: "useWard",
+      name: "useCrest",
       from: resolver.resolve("./runtime/composable"),
     });
 
     addServerImports([
       {
-        name: "defineWardHandlers",
+        name: "defineCrestHandlers",
         from: resolver.resolve("./server/handlers"),
       },
     ]);

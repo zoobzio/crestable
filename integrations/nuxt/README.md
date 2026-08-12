@@ -1,8 +1,8 @@
-# @warded/nuxt
+# @crestable/nuxt
 
-Nuxt module for warded with SSR. It provides a `$warded` service
-resolved on the server and hydrated on the client, the `useWard()`
-composable, and the `defineWardHandlers` server helper — all typed by
+Nuxt module for crestable with SSR. It provides a `$crestable` service
+resolved on the server and hydrated on the client, the `useCrest()`
+composable, and the `defineCrestHandlers` server helper — all typed by
 the app's own contract.
 
 ## Setup
@@ -21,24 +21,24 @@ export const contract = {
 import { contract } from "./shared/contract";
 
 export default defineNuxtConfig({
-  modules: ["@warded/nuxt"],
-  warded: { contract },
+  modules: ["@crestable/nuxt"],
+  crestable: { contract },
 });
 ```
 
-Write your provider (a set of callbacks over warded's own domain objects
+Write your provider (a set of callbacks over crestable's own domain objects
 — the h3 event is its own domain, closed over per request), then hand it to
-`defineWardHandlers` in one server route file:
+`defineCrestHandlers` in one server route file:
 
 ```ts
-// server/api/_warded/[action].ts
-import { defineSchema } from "warded";
+// server/api/_crestable/[action].ts
+import { defineSchema } from "crestable";
 import { contract } from "../../../shared/contract";
 import { createMyProvider } from "../../providers/auth";
 
 const schema = defineSchema(contract);
 
-export default defineWardHandlers(schema, (event) =>
+export default defineCrestHandlers(schema, (event) =>
   createMyProvider(schema, { event }, (claims) => ({ ... })),
 );
 ```
@@ -50,12 +50,12 @@ ships with the module.
 
 ```vue
 <script setup lang="ts">
-const warded = useWard();
+const crestable = useCrest();
 </script>
 
 <template>
-  <p v-if="warded.authenticated">Hi, {{ warded.current?.name }}</p>
-  <button v-if="warded.can('docs:write')">Edit</button>
+  <p v-if="crestable.authenticated">Hi, {{ crestable.current?.name }}</p>
+  <button v-if="crestable.can('docs:write')">Edit</button>
 </template>
 ```
 
@@ -65,7 +65,7 @@ scope fails to compile in the app.
 ## How it works
 
 - At build time the module proves the configured contract, writes it to the
-  `#build/warded.mjs` template, and derives the `AppContract` literal type
+  `#build/crestable.mjs` template, and derives the `AppContract` literal type
   — so both sides of the wire share one vocabulary and the app surface is
   fully typed.
 - The runtime plugin derives the schema from the build contract, builds the
@@ -73,7 +73,7 @@ scope fails to compile in the app.
   user so state populates before render and serializes to the client — no
   refetch or auth flash on hydration.
 - The module's transport is itself a provider whose vendor is the app's own
-  warded routes: every callback dials `/api/_warded/*`, and each answer
+  crestable routes: every callback dials `/api/_crestable/*`, and each answer
   is proven against the schema before it lands in state.
 - The user's provider runs only inside the server handlers, constructed per
   request with the h3 event; the auth host never reaches the browser.

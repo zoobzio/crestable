@@ -53,9 +53,9 @@ importers:
       '@nuxt/kit':
         specifier: ^4.4.6
         version: 4.5.2(magic-string@0.30.21)(magicast@0.5.4)(rolldown@1.2.3)
-      warded:
+      crestable:
         specifier: workspace:*
-        version: link:../../packages/warded
+        version: link:../../packages/crestable
       h3:
         specifier: ^1.15.11
         version: 1.15.11
@@ -66,28 +66,28 @@ importers:
 
   packages/core:
     dependencies:
-      '@warded/kit':
+      '@crestable/kit':
         specifier: workspace:*
         version: link:../kit
-      '@warded/schema':
+      '@crestable/schema':
         specifier: workspace:*
         version: link:../schema
 
-  packages/warded:
+  packages/crestable:
     dependencies:
-      '@warded/core':
+      '@crestable/core':
         specifier: workspace:*
         version: link:../core
-      '@warded/kit':
+      '@crestable/kit':
         specifier: workspace:*
         version: link:../kit
-      '@warded/schema':
+      '@crestable/schema':
         specifier: workspace:*
         version: link:../schema
 
   packages/kit:
     dependencies:
-      '@warded/schema':
+      '@crestable/schema':
         specifier: workspace:*
         version: link:../schema
       objectively:

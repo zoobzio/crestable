@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { Meta, User } from "@warded/schema";
-import { SchemaError, defineSchema } from "@warded/schema";
+import type { Meta, User } from "@crestable/schema";
+import { SchemaError, defineSchema } from "@crestable/schema";
 import type { State } from "../src/index";
 import { defineProvider } from "../src/index";
 

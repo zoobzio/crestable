@@ -14,12 +14,12 @@ export default defineBuildConfig({
   externals: [
     "#app",
     "#imports",
-    "#build/warded.mjs",
-    "#build/types/warded.d.ts",
+    "#build/crestable.mjs",
+    "#build/types/crestable.d.ts",
     "@nuxt/kit",
     "@nuxt/schema",
-    "warded",
-    "warded/kit",
+    "crestable",
+    "crestable/kit",
     "h3",
   ],
   rollup: {

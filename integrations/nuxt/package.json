@@ -1,9 +1,9 @@
 {
-  "name": "@warded/nuxt",
+  "name": "@crestable/nuxt",
   "version": "0.0.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/zoobzio/warded.git",
+    "url": "git+https://github.com/zoobzio/crestable.git",
     "directory": "integrations/nuxt"
   },
   "type": "module",
@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "@nuxt/kit": "^4.4.6",
-    "warded": "workspace:*",
+    "crestable": "workspace:*",
     "h3": "^1.15.11"
   },
   "devDependencies": {

@@ -216,7 +216,7 @@ export interface Schema<C extends Contract> {
 }
 
 /**
- * The fixed top-level shape every warded user satisfies. `Meta` is the
+ * The fixed top-level shape every crestable user satisfies. `Meta` is the
  * consumer-defined portion, typed per service instance.
  */
 export interface User<Meta> {
@@ -264,7 +264,7 @@ export interface User<Meta> {
 
   /**
    * Epoch-milliseconds timestamp after which the session is considered
-   * stale. Ward never acts on staleness itself; it only reports it.
+   * stale. Crest never acts on staleness itself; it only reports it.
    */
   expires?: number;
 

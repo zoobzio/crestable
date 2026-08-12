@@ -1,10 +1,10 @@
 {
-  "name": "warded",
+  "name": "crestable",
   "version": "0.0.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/zoobzio/warded.git",
-    "directory": "packages/warded"
+    "url": "git+https://github.com/zoobzio/crestable.git",
+    "directory": "packages/crestable"
   },
   "type": "module",
   "main": "./.dist/index.mjs",
@@ -30,8 +30,8 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@warded/core": "workspace:*",
-    "@warded/kit": "workspace:*",
-    "@warded/schema": "workspace:*"
+    "@crestable/core": "workspace:*",
+    "@crestable/kit": "workspace:*",
+    "@crestable/schema": "workspace:*"
   }
 }

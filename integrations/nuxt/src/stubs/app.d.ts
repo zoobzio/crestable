@@ -1,9 +1,9 @@
 // Typecheck-only stub for the Nuxt `#app` virtual module.
-import type { AppWard } from "../runtime/types";
+import type { AppCrest } from "../runtime/types";
 
-/** The Nuxt app instance. `$warded` is added by the warded runtime. */
+/** The Nuxt app instance. `$crestable` is added by the crestable runtime. */
 export interface NuxtApp {
-  $warded: AppWard;
+  $crestable: AppCrest;
 }
 
 interface NuxtPluginDef {

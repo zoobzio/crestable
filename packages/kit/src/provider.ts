@@ -1,9 +1,9 @@
-import type { Contract, Schema } from "@warded/schema";
+import type { Contract, Schema } from "@crestable/schema";
 import type { Bridge, Provider } from "./types";
 
 /**
  * Author a provider constructor — the published artifact of an integration
- * (`@warded/auth0`, …) and the same entry point homegrown providers use.
+ * (`@crestable/auth0`, …) and the same entry point homegrown providers use.
  *
  * The implementation is the internal mechanism, written at the root
  * {@link Contract}: vendor terms only — `Options` and `Payload` are the
