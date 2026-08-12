@@ -1,12 +1,12 @@
-import type { Contract, Schema } from "crucible";
-import type { Provider } from "crucible/kit";
+import type { Contract, Schema } from "warded";
+import type { Provider } from "warded/kit";
 
 import { useRequestFetch } from "#imports";
 
 import { PREFIX } from "../constant";
 
 /**
- * Dials a crucible route. `useRequestFetch` returns a fetch that forwards
+ * Dials a warded route. `useRequestFetch` returns a fetch that forwards
  * the incoming request's cookies during SSR, so a server-side `resolve()`
  * reaches the session route with the user's cookie attached; in the browser
  * it is a plain same-origin fetch.
@@ -27,7 +27,7 @@ const settle = <C extends Contract>(schema: Schema<C>, payload: unknown) =>
 
 /**
  * The browser-side provider the module ships. Its vendor is the app's own
- * crucible routes: every callback dials `${PREFIX}/…`, the wire answers
+ * warded routes: every callback dials `${PREFIX}/…`, the wire answers
  * with the session state after the action, and the payload is proven
  * against the schema before it lands in state. The auth host never reaches
  * the browser — the user's real provider runs only inside the server

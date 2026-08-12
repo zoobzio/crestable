@@ -14,12 +14,12 @@ export default defineBuildConfig({
   externals: [
     "#app",
     "#imports",
-    "#build/crucible.mjs",
-    "#build/types/crucible.d.ts",
+    "#build/warded.mjs",
+    "#build/types/warded.d.ts",
     "@nuxt/kit",
     "@nuxt/schema",
-    "crucible",
-    "crucible/kit",
+    "warded",
+    "warded/kit",
     "h3",
   ],
   rollup: {

@@ -1,9 +1,9 @@
 // Typecheck-only stub for the Nuxt `#app` virtual module.
-import type { AppCrucible } from "../runtime/types";
+import type { AppWard } from "../runtime/types";
 
-/** The Nuxt app instance. `$crucible` is added by the crucible runtime. */
+/** The Nuxt app instance. `$warded` is added by the warded runtime. */
 export interface NuxtApp {
-  $crucible: AppCrucible;
+  $warded: AppWard;
 }
 
 interface NuxtPluginDef {

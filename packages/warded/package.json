@@ -1,10 +1,10 @@
 {
-  "name": "crucible",
+  "name": "warded",
   "version": "0.0.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/zoobzio/crucible.git",
-    "directory": "packages/crucible"
+    "url": "git+https://github.com/zoobzio/warded.git",
+    "directory": "packages/warded"
   },
   "type": "module",
   "main": "./.dist/index.mjs",
@@ -30,8 +30,8 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@crucible/core": "workspace:*",
-    "@crucible/kit": "workspace:*",
-    "@crucible/schema": "workspace:*"
+    "@warded/core": "workspace:*",
+    "@warded/kit": "workspace:*",
+    "@warded/schema": "workspace:*"
   }
 }

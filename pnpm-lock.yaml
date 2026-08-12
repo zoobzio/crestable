@@ -53,9 +53,9 @@ importers:
       '@nuxt/kit':
         specifier: ^4.4.6
         version: 4.5.2(magic-string@0.30.21)(magicast@0.5.4)(rolldown@1.2.3)
-      crucible:
+      warded:
         specifier: workspace:*
-        version: link:../../packages/crucible
+        version: link:../../packages/warded
       h3:
         specifier: ^1.15.11
         version: 1.15.11
@@ -66,28 +66,28 @@ importers:
 
   packages/core:
     dependencies:
-      '@crucible/kit':
+      '@warded/kit':
         specifier: workspace:*
         version: link:../kit
-      '@crucible/schema':
+      '@warded/schema':
         specifier: workspace:*
         version: link:../schema
 
-  packages/crucible:
+  packages/warded:
     dependencies:
-      '@crucible/core':
+      '@warded/core':
         specifier: workspace:*
         version: link:../core
-      '@crucible/kit':
+      '@warded/kit':
         specifier: workspace:*
         version: link:../kit
-      '@crucible/schema':
+      '@warded/schema':
         specifier: workspace:*
         version: link:../schema
 
   packages/kit:
     dependencies:
-      '@crucible/schema':
+      '@warded/schema':
         specifier: workspace:*
         version: link:../schema
       objectively:

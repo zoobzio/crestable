@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { Meta, User } from "@crucible/schema";
-import { SchemaError, defineSchema } from "@crucible/schema";
+import type { Meta, User } from "@warded/schema";
+import { SchemaError, defineSchema } from "@warded/schema";
 import { defineState } from "../src/index";
 
 const schema = defineSchema({

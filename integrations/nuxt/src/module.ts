@@ -1,7 +1,7 @@
-import type { Contract } from "crucible";
+import type { Contract } from "warded";
 import type { NuxtModule } from "@nuxt/schema";
 
-import { defineSchema } from "crucible";
+import { defineSchema } from "warded";
 
 import {
   addImports,
@@ -33,23 +33,23 @@ const tuple = (values: readonly string[]): string =>
   `readonly [${values.map(literal).join(", ")}]`;
 
 /**
- * Nuxt module for crucible.
+ * Nuxt module for warded.
  *
  * At build time it validates the configured contract by deriving a schema
- * from it, writes the contract to the `crucible.mjs` build template, and
- * derives the `AppContract` literal type into the `types/crucible.d.ts`
+ * from it, writes the contract to the `warded.mjs` build template, and
+ * derives the `AppContract` literal type into the `types/warded.d.ts`
  * type template — so the runtime service, the composable, and the server
  * handlers all speak the app's own vocabulary. It registers the runtime
- * plugin (which builds the `$crucible` service and resolves the user during
- * SSR), auto-imports `useCrucible` in the app, and auto-imports
- * `defineCrucibleHandlers` in the Nitro server. The user writes two things:
+ * plugin (which builds the `$warded` service and resolves the user during
+ * SSR), auto-imports `useWard` in the app, and auto-imports
+ * `defineWardHandlers` in the Nitro server. The user writes two things:
  * their provider, and the one route file that hands it to
- * `defineCrucibleHandlers`.
+ * `defineWardHandlers`.
  */
 const module: NuxtModule<ModuleOptions> = defineNuxtModule<ModuleOptions>({
   meta: {
-    name: "crucible",
-    configKey: "crucible",
+    name: "warded",
+    configKey: "warded",
   },
   setup: (options, _nuxt) => {
     const resolver = createResolver(import.meta.url);
@@ -57,7 +57,7 @@ const module: NuxtModule<ModuleOptions> = defineNuxtModule<ModuleOptions>({
     const contract = options.contract;
     if (!contract) {
       throw new Error(
-        "crucible: no contract configured — set `crucible.contract` in nuxt.config.",
+        "warded: no contract configured — set `warded.contract` in nuxt.config.",
       );
     }
 
@@ -65,23 +65,23 @@ const module: NuxtModule<ModuleOptions> = defineNuxtModule<ModuleOptions>({
     defineSchema(contract);
 
     addTemplate({
-      filename: "crucible.mjs",
+      filename: "warded.mjs",
       write: true,
       getContents: () => `export const contract = ${JSON.stringify(contract)};`,
     });
 
     addTemplate({
-      filename: "crucible.d.mts",
+      filename: "warded.d.mts",
       write: true,
       getContents: () =>
         [
-          `import type { AppContract } from "./types/crucible";`,
+          `import type { AppContract } from "./types/warded";`,
           `export declare const contract: AppContract;`,
         ].join("\n"),
     });
 
     addTypeTemplate({
-      filename: "types/crucible.d.ts",
+      filename: "types/warded.d.ts",
       write: true,
       getContents: () => {
         const meta = Object.entries(contract.meta)
@@ -105,13 +105,13 @@ const module: NuxtModule<ModuleOptions> = defineNuxtModule<ModuleOptions>({
     addPlugin(resolver.resolve("./runtime/plugin"));
 
     addImports({
-      name: "useCrucible",
+      name: "useWard",
       from: resolver.resolve("./runtime/composable"),
     });
 
     addServerImports([
       {
-        name: "defineCrucibleHandlers",
+        name: "defineWardHandlers",
         from: resolver.resolve("./server/handlers"),
       },
     ]);

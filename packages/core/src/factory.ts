@@ -1,18 +1,18 @@
-import type { Crucible, Events } from "./types";
-import type { Contract, Schema } from "@crucible/schema";
-import type { Provider, State } from "@crucible/kit";
+import type { Ward, Events } from "./types";
+import type { Contract, Schema } from "@warded/schema";
+import type { Provider, State } from "@warded/kit";
 
-import { defineState } from "@crucible/kit";
+import { defineState } from "@warded/kit";
 
 /**
- * Builds the runtime {@link Crucible} service over a schema and a provider.
+ * Builds the runtime {@link Ward} service over a schema and a provider.
  *
  * The caller-owned container is fronted by the schema-guarded state from
  * `defineState`, so every write — by the provider, or a deep mutation from
  * anywhere — is proven against the contract before it commits, and every
  * committed write emits `change`. The lifecycle methods invoke the matching
  * provider callback with the guarded state and the schema; the provider
- * assigns what it establishes, and crucible reads the outcome back off the
+ * assigns what it establishes, and warded reads the outcome back off the
  * state.
  *
  * @param schema - The validation bundle derived from the app's contract.
@@ -20,13 +20,13 @@ import { defineState } from "@crucible/kit";
  * @param target - The underlying container; created when omitted. Mutated
  *   in place, so a caller that owns the object (e.g. a reactive one) sees
  *   every write.
- * @returns A {@link Crucible} service bound to the container.
+ * @returns A {@link Ward} service bound to the container.
  */
-export const defineCrucible = <C extends Contract>(
+export const defineWard = <C extends Contract>(
   schema: Schema<C>,
   provider: Provider<C>,
   target: State<C> = { current: null },
-): Crucible<C> => {
+): Ward<C> => {
   const handlers: {
     [Event in keyof Events<C>]: Set<(payload: Events<C>[Event]) => void>;
   } = {

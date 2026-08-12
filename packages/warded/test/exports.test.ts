@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 import type { Provider } from "../src/kit";
-import { defineCrucible, defineSchema } from "../src/index";
+import { defineWard, defineSchema } from "../src/index";
 import { defineProvider, defineState } from "../src/kit";
 
-describe("crucible", () => {
+describe("warded", () => {
   it("exposes the consumer surface at the root", () => {
-    expect(defineCrucible).toBeTypeOf("function");
+    expect(defineWard).toBeTypeOf("function");
     expect(defineSchema).toBeTypeOf("function");
   });
 
@@ -34,12 +34,12 @@ describe("crucible", () => {
       },
     };
 
-    const crucible = defineCrucible(schema, provider);
+    const warded = defineWard(schema, provider);
 
-    await crucible.resolve();
-    expect(crucible.can("docs:read")).toBe(true);
-    expect(crucible.can("docs:write")).toBe(false);
-    expect(crucible.is("editor")).toBe(true);
-    expect(crucible.is("admin")).toBe(false);
+    await warded.resolve();
+    expect(warded.can("docs:read")).toBe(true);
+    expect(warded.can("docs:write")).toBe(false);
+    expect(warded.is("editor")).toBe(true);
+    expect(warded.is("admin")).toBe(false);
   });
 });

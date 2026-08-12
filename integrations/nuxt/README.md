@@ -1,8 +1,8 @@
-# @crucible/nuxt
+# @warded/nuxt
 
-Nuxt module for crucible with SSR. It provides a `$crucible` service
-resolved on the server and hydrated on the client, the `useCrucible()`
-composable, and the `defineCrucibleHandlers` server helper — all typed by
+Nuxt module for warded with SSR. It provides a `$warded` service
+resolved on the server and hydrated on the client, the `useWard()`
+composable, and the `defineWardHandlers` server helper — all typed by
 the app's own contract.
 
 ## Setup
@@ -21,24 +21,24 @@ export const contract = {
 import { contract } from "./shared/contract";
 
 export default defineNuxtConfig({
-  modules: ["@crucible/nuxt"],
-  crucible: { contract },
+  modules: ["@warded/nuxt"],
+  warded: { contract },
 });
 ```
 
-Write your provider (a set of callbacks over crucible's own domain objects
+Write your provider (a set of callbacks over warded's own domain objects
 — the h3 event is its own domain, closed over per request), then hand it to
-`defineCrucibleHandlers` in one server route file:
+`defineWardHandlers` in one server route file:
 
 ```ts
-// server/api/_crucible/[action].ts
-import { defineSchema } from "crucible";
+// server/api/_warded/[action].ts
+import { defineSchema } from "warded";
 import { contract } from "../../../shared/contract";
 import { createMyProvider } from "../../providers/auth";
 
 const schema = defineSchema(contract);
 
-export default defineCrucibleHandlers(schema, (event) =>
+export default defineWardHandlers(schema, (event) =>
   createMyProvider(schema, { event }, (claims) => ({ ... })),
 );
 ```
@@ -50,12 +50,12 @@ ships with the module.
 
 ```vue
 <script setup lang="ts">
-const crucible = useCrucible();
+const warded = useWard();
 </script>
 
 <template>
-  <p v-if="crucible.authenticated">Hi, {{ crucible.current?.name }}</p>
-  <button v-if="crucible.can('docs:write')">Edit</button>
+  <p v-if="warded.authenticated">Hi, {{ warded.current?.name }}</p>
+  <button v-if="warded.can('docs:write')">Edit</button>
 </template>
 ```
 
@@ -65,7 +65,7 @@ scope fails to compile in the app.
 ## How it works
 
 - At build time the module proves the configured contract, writes it to the
-  `#build/crucible.mjs` template, and derives the `AppContract` literal type
+  `#build/warded.mjs` template, and derives the `AppContract` literal type
   — so both sides of the wire share one vocabulary and the app surface is
   fully typed.
 - The runtime plugin derives the schema from the build contract, builds the
@@ -73,7 +73,7 @@ scope fails to compile in the app.
   user so state populates before render and serializes to the client — no
   refetch or auth flash on hydration.
 - The module's transport is itself a provider whose vendor is the app's own
-  crucible routes: every callback dials `/api/_crucible/*`, and each answer
+  warded routes: every callback dials `/api/_warded/*`, and each answer
   is proven against the schema before it lands in state.
 - The user's provider runs only inside the server handlers, constructed per
   request with the h3 event; the auth host never reaches the browser.

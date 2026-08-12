@@ -1,21 +1,21 @@
-import type { Contract, Schema } from "crucible";
-import type { Provider } from "crucible/kit";
+import type { Contract, Schema } from "warded";
+import type { Provider } from "warded/kit";
 import type { EventHandler, H3Event } from "h3";
 
-import { defineState } from "crucible/kit";
+import { defineState } from "warded/kit";
 import { createError, defineEventHandler, getRouterParam } from "h3";
 
 /**
  * Turn a schema and a per-request provider constructor into the server
  * endpoints the browser transport talks to. The user drops one file into
- * their Nitro server — `server/api/_crucible/[action].ts` — whose default
- * export is `defineCrucibleHandlers(schema, (event) => provider)`.
+ * their Nitro server — `server/api/_warded/[action].ts` — whose default
+ * export is `defineWardHandlers(schema, (event) => provider)`.
  *
  * The constructor runs once per request with the h3 event: the event is the
  * provider's own domain — cookies, headers, body, everything a flow needs —
- * closed over at construction, never threaded through crucible. Each action
+ * closed over at construction, never threaded through warded. Each action
  * builds a guarded per-request state, invokes the matching callback with
- * crucible's own domain objects, and answers with the session state after
+ * warded's own domain objects, and answers with the session state after
  * the action:
  *
  * - `session` → `resolve` — the current user, or `null`
@@ -26,7 +26,7 @@ import { createError, defineEventHandler, getRouterParam } from "h3";
  * The auth host never reaches the browser, which only ever sees these
  * routes.
  */
-export const defineCrucibleHandlers = <C extends Contract>(
+export const defineWardHandlers = <C extends Contract>(
   schema: Schema<C>,
   provider: (event: H3Event) => Provider<C>,
 ): EventHandler => {
@@ -61,7 +61,7 @@ export const defineCrucibleHandlers = <C extends Contract>(
       default:
         throw createError({
           statusCode: 404,
-          statusMessage: `Unknown crucible action "${action ?? ""}"`,
+          statusMessage: `Unknown warded action "${action ?? ""}"`,
         });
     }
   });

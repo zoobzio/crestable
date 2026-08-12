@@ -10,8 +10,8 @@
     "paths": {
       "#app": ["./src/stubs/app.d.ts"],
       "#imports": ["./src/stubs/imports.d.ts"],
-      "#build/crucible.mjs": ["./src/stubs/build/crucible.d.mts"],
-      "#build/types/crucible.d.ts": ["./src/stubs/build/types/crucible.d.ts"]
+      "#build/warded.mjs": ["./src/stubs/build/warded.d.mts"],
+      "#build/types/warded.d.ts": ["./src/stubs/build/types/warded.d.ts"]
     }
   },
   "include": ["src", "test"]

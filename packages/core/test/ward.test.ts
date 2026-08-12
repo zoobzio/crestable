@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
-import type { Meta, User } from "@crucible/schema";
-import { SchemaError, defineSchema } from "@crucible/schema";
-import type { Provider, State } from "@crucible/kit";
-import { defineCrucible } from "../src/index";
+import type { Meta, User } from "@warded/schema";
+import { SchemaError, defineSchema } from "@warded/schema";
+import type { Provider, State } from "@warded/kit";
+import { defineWard } from "../src/index";
 
 const schema = defineSchema({
   scopes: ["docs:read", "docs:write", "admin"],
@@ -35,45 +35,45 @@ function fakeProvider(overrides: Partial<Provider<C>> = {}): Provider<C> {
 describe("state", () => {
   it("mutates a caller-owned container in place", async () => {
     const target: State<C> = { current: null };
-    const crucible = defineCrucible(schema, fakeProvider(), target);
+    const warded = defineWard(schema, fakeProvider(), target);
 
-    await crucible.resolve();
+    await warded.resolve();
     // The owner of the object sees the change without going through the
     // service — this is what lets Nuxt back the container with useState.
     expect(target.current).toEqual(ada());
 
-    await crucible.logout();
+    await warded.logout();
     expect(target.current).toBeNull();
   });
 
   it("seeds the current user from the passed-in container", () => {
     const target: State<C> = { current: ada() };
-    const crucible = defineCrucible(schema, fakeProvider(), target);
+    const warded = defineWard(schema, fakeProvider(), target);
 
-    expect(crucible.current).toEqual(ada());
-    expect(crucible.authenticated).toBe(true);
+    expect(warded.current).toEqual(ada());
+    expect(warded.authenticated).toBe(true);
   });
 });
 
 describe("resolve", () => {
   it("establishes state through the provider and emits change", async () => {
     const provider = fakeProvider();
-    const crucible = defineCrucible(schema, provider);
+    const warded = defineWard(schema, provider);
     const onChange = vi.fn();
-    crucible.on("change", onChange);
+    warded.on("change", onChange);
 
-    await expect(crucible.resolve()).resolves.toEqual(ada());
+    await expect(warded.resolve()).resolves.toEqual(ada());
     expect(provider.resolve).toHaveBeenCalledOnce();
-    expect(crucible.current).toEqual(ada());
-    expect(crucible.authenticated).toBe(true);
+    expect(warded.current).toEqual(ada());
+    expect(warded.authenticated).toBe(true);
     expect(onChange).toHaveBeenCalledWith(ada());
   });
 
   it("hands the provider the guarded state and the schema", async () => {
     const provider = fakeProvider();
-    const crucible = defineCrucible(schema, provider);
+    const warded = defineWard(schema, provider);
 
-    await crucible.resolve();
+    await warded.resolve();
     expect(provider.resolve).toHaveBeenCalledWith(
       expect.objectContaining({ current: ada() }),
       schema,
@@ -82,15 +82,15 @@ describe("resolve", () => {
 
   it("clears state when the provider resolves no user", async () => {
     const provider = fakeProvider();
-    const crucible = defineCrucible(schema, provider);
-    await crucible.resolve();
+    const warded = defineWard(schema, provider);
+    await warded.resolve();
 
     vi.mocked(provider.resolve).mockImplementationOnce(async (state) => {
       state.current = null;
     });
-    await expect(crucible.resolve()).resolves.toBeNull();
-    expect(crucible.current).toBeNull();
-    expect(crucible.authenticated).toBe(false);
+    await expect(warded.resolve()).resolves.toBeNull();
+    expect(warded.current).toBeNull();
+    expect(warded.authenticated).toBe(false);
   });
 
   it("rejects a provider write that violates the contract", async () => {
@@ -99,51 +99,51 @@ describe("resolve", () => {
         state.current = { id: "" } as unknown as User<Meta<C>>;
       }),
     });
-    const crucible = defineCrucible(schema, provider);
+    const warded = defineWard(schema, provider);
 
-    await expect(crucible.resolve()).rejects.toThrow(SchemaError);
-    expect(crucible.current).toBeNull();
+    await expect(warded.resolve()).rejects.toThrow(SchemaError);
+    expect(warded.current).toBeNull();
   });
 });
 
 describe("login", () => {
   it("resolves to the user the provider establishes", async () => {
     const provider = fakeProvider();
-    const crucible = defineCrucible(schema, provider);
+    const warded = defineWard(schema, provider);
 
-    await expect(crucible.login()).resolves.toEqual(ada());
+    await expect(warded.login()).resolves.toEqual(ada());
     expect(provider.login).toHaveBeenCalledOnce();
-    expect(crucible.current).toEqual(ada());
+    expect(warded.current).toEqual(ada());
   });
 
   it("emits login with the established user", async () => {
-    const crucible = defineCrucible(schema, fakeProvider());
+    const warded = defineWard(schema, fakeProvider());
     const onLogin = vi.fn();
-    crucible.on("login", onLogin);
+    warded.on("login", onLogin);
 
-    await crucible.login();
+    await warded.login();
     expect(onLogin).toHaveBeenCalledExactlyOnceWith(ada());
   });
 
   it("does not emit login for an out-of-band flow", async () => {
     const provider = fakeProvider({ login: vi.fn(async () => {}) });
-    const crucible = defineCrucible(schema, provider);
+    const warded = defineWard(schema, provider);
     const onLogin = vi.fn();
-    crucible.on("login", onLogin);
+    warded.on("login", onLogin);
 
-    await crucible.login();
+    await warded.login();
     expect(onLogin).not.toHaveBeenCalled();
   });
 
   it("leaves state untouched when the flow continues out-of-band", async () => {
     const provider = fakeProvider({ login: vi.fn(async () => {}) });
-    const crucible = defineCrucible(schema, provider);
-    await crucible.resolve();
+    const warded = defineWard(schema, provider);
+    await warded.resolve();
     const onChange = vi.fn();
-    crucible.on("change", onChange);
+    warded.on("change", onChange);
 
-    await expect(crucible.login()).resolves.toEqual(ada());
-    expect(crucible.current).toEqual(ada());
+    await expect(warded.login()).resolves.toEqual(ada());
+    expect(warded.current).toEqual(ada());
     expect(onChange).not.toHaveBeenCalled();
   });
 });
@@ -151,14 +151,14 @@ describe("login", () => {
 describe("logout", () => {
   it("tears down via the provider and clears state", async () => {
     const provider = fakeProvider();
-    const crucible = defineCrucible(schema, provider);
-    await crucible.resolve();
+    const warded = defineWard(schema, provider);
+    await warded.resolve();
     const onChange = vi.fn();
-    crucible.on("change", onChange);
+    warded.on("change", onChange);
 
-    await crucible.logout();
+    await warded.logout();
     expect(provider.logout).toHaveBeenCalledOnce();
-    expect(crucible.current).toBeNull();
+    expect(warded.current).toBeNull();
     expect(onChange).toHaveBeenCalledWith(null);
   });
 
@@ -168,33 +168,33 @@ describe("logout", () => {
         state.current = null;
       }),
     });
-    const crucible = defineCrucible(schema, provider);
-    await crucible.resolve();
+    const warded = defineWard(schema, provider);
+    await warded.resolve();
     const onChange = vi.fn();
-    crucible.on("change", onChange);
+    warded.on("change", onChange);
 
-    await crucible.logout();
-    expect(crucible.current).toBeNull();
+    await warded.logout();
+    expect(warded.current).toBeNull();
     expect(onChange).toHaveBeenCalledExactlyOnceWith(null);
   });
 
   it("emits logout with the user that left", async () => {
-    const crucible = defineCrucible(schema, fakeProvider());
-    await crucible.resolve();
+    const warded = defineWard(schema, fakeProvider());
+    await warded.resolve();
     const onLogout = vi.fn();
-    crucible.on("logout", onLogout);
+    warded.on("logout", onLogout);
 
-    await crucible.logout();
+    await warded.logout();
     expect(onLogout).toHaveBeenCalledExactlyOnceWith(ada());
   });
 
   it("skips the provider when already unauthenticated", async () => {
     const provider = fakeProvider();
-    const crucible = defineCrucible(schema, provider);
+    const warded = defineWard(schema, provider);
     const onLogout = vi.fn();
-    crucible.on("logout", onLogout);
+    warded.on("logout", onLogout);
 
-    await crucible.logout();
+    await warded.logout();
     expect(provider.logout).not.toHaveBeenCalled();
     expect(onLogout).not.toHaveBeenCalled();
   });
@@ -207,10 +207,10 @@ describe("refresh", () => {
         state.current = { ...ada(), expires: 2000 };
       }),
     });
-    const crucible = defineCrucible(schema, provider);
-    await crucible.resolve();
+    const warded = defineWard(schema, provider);
+    await warded.resolve();
 
-    await expect(crucible.refresh()).resolves.toEqual({
+    await expect(warded.refresh()).resolves.toEqual({
       ...ada(),
       expires: 2000,
     });
@@ -223,20 +223,20 @@ describe("refresh", () => {
         state.current = null;
       }),
     });
-    const crucible = defineCrucible(schema, provider);
-    await crucible.resolve();
+    const warded = defineWard(schema, provider);
+    await warded.resolve();
 
-    await expect(crucible.refresh()).resolves.toBeNull();
-    expect(crucible.current).toBeNull();
+    await expect(warded.refresh()).resolves.toBeNull();
+    expect(warded.current).toBeNull();
   });
 
   it("is a no-op without a provider refresh or a current user", async () => {
-    const crucible = defineCrucible(schema, fakeProvider());
-    await crucible.resolve();
-    await expect(crucible.refresh()).resolves.toEqual(ada());
+    const warded = defineWard(schema, fakeProvider());
+    await warded.resolve();
+    await expect(warded.refresh()).resolves.toEqual(ada());
 
     const refresh = vi.fn(async () => {});
-    const anonymous = defineCrucible(schema, fakeProvider({ refresh }));
+    const anonymous = defineWard(schema, fakeProvider({ refresh }));
     await expect(anonymous.refresh()).resolves.toBeNull();
     expect(refresh).not.toHaveBeenCalled();
   });
@@ -244,46 +244,46 @@ describe("refresh", () => {
 
 describe("deep mutation", () => {
   it("tracks valid deep writes and emits change", async () => {
-    const crucible = defineCrucible(schema, fakeProvider());
-    await crucible.resolve();
+    const warded = defineWard(schema, fakeProvider());
+    await warded.resolve();
     const onChange = vi.fn();
-    crucible.on("change", onChange);
+    warded.on("change", onChange);
 
-    crucible.current!.meta.name = "Grace";
-    expect(crucible.current?.meta.name).toBe("Grace");
+    warded.current!.meta.name = "Grace";
+    expect(warded.current?.meta.name).toBe("Grace");
     expect(onChange).toHaveBeenCalledOnce();
   });
 
   it("rejects invalid deep writes without emitting", async () => {
-    const crucible = defineCrucible(schema, fakeProvider());
-    await crucible.resolve();
+    const warded = defineWard(schema, fakeProvider());
+    await warded.resolve();
     const onChange = vi.fn();
-    crucible.on("change", onChange);
+    warded.on("change", onChange);
 
     expect(() => {
-      crucible.current!.scopes.push("docs:delete" as never);
+      warded.current!.scopes.push("docs:delete" as never);
     }).toThrow(SchemaError);
-    expect(crucible.current?.scopes).toEqual(ada().scopes);
+    expect(warded.current?.scopes).toEqual(ada().scopes);
     expect(onChange).not.toHaveBeenCalled();
   });
 });
 
 describe("can", () => {
   it("grants when the user holds every scope", async () => {
-    const crucible = defineCrucible(schema, fakeProvider());
-    await crucible.resolve();
+    const warded = defineWard(schema, fakeProvider());
+    await warded.resolve();
 
-    expect(crucible.can("docs:read")).toBe(true);
-    expect(crucible.can("docs:read", "docs:write")).toBe(true);
+    expect(warded.can("docs:read")).toBe(true);
+    expect(warded.can("docs:read", "docs:write")).toBe(true);
   });
 
   it("denies on a missing scope and emits the denial", async () => {
-    const crucible = defineCrucible(schema, fakeProvider());
-    await crucible.resolve();
+    const warded = defineWard(schema, fakeProvider());
+    await warded.resolve();
     const onDenied = vi.fn();
-    crucible.on("denied", onDenied);
+    warded.on("denied", onDenied);
 
-    expect(crucible.can("docs:read", "admin")).toBe(false);
+    expect(warded.can("docs:read", "admin")).toBe(false);
     expect(onDenied).toHaveBeenCalledWith({
       check: "scope",
       required: ["docs:read", "admin"],
@@ -292,11 +292,11 @@ describe("can", () => {
   });
 
   it("denies when unauthenticated", () => {
-    const crucible = defineCrucible(schema, fakeProvider());
+    const warded = defineWard(schema, fakeProvider());
     const onDenied = vi.fn();
-    crucible.on("denied", onDenied);
+    warded.on("denied", onDenied);
 
-    expect(crucible.can("docs:read")).toBe(false);
+    expect(warded.can("docs:read")).toBe(false);
     expect(onDenied).toHaveBeenCalledWith({
       check: "scope",
       required: ["docs:read"],
@@ -307,20 +307,20 @@ describe("can", () => {
 
 describe("is", () => {
   it("grants when the user holds any of the roles", async () => {
-    const crucible = defineCrucible(schema, fakeProvider());
-    await crucible.resolve();
+    const warded = defineWard(schema, fakeProvider());
+    await warded.resolve();
 
-    expect(crucible.is("editor")).toBe(true);
-    expect(crucible.is("admin", "editor")).toBe(true);
+    expect(warded.is("editor")).toBe(true);
+    expect(warded.is("admin", "editor")).toBe(true);
   });
 
   it("denies when the user holds none and emits the denial", async () => {
-    const crucible = defineCrucible(schema, fakeProvider());
-    await crucible.resolve();
+    const warded = defineWard(schema, fakeProvider());
+    await warded.resolve();
     const onDenied = vi.fn();
-    crucible.on("denied", onDenied);
+    warded.on("denied", onDenied);
 
-    expect(crucible.is("admin", "owner")).toBe(false);
+    expect(warded.is("admin", "owner")).toBe(false);
     expect(onDenied).toHaveBeenCalledWith({
       check: "role",
       required: ["admin", "owner"],
@@ -331,23 +331,23 @@ describe("is", () => {
 
 describe("vocabulary", () => {
   it("carries the contract's vocabulary in the check types", async () => {
-    const crucible = defineCrucible(schema, fakeProvider());
-    await crucible.resolve();
+    const warded = defineWard(schema, fakeProvider());
+    await warded.resolve();
 
     // @ts-expect-error — a scope outside the contract fails to compile
-    expect(crucible.can("docs:delete")).toBe(false);
+    expect(warded.can("docs:delete")).toBe(false);
     // @ts-expect-error — a role outside the contract fails to compile
-    expect(crucible.is("viewer")).toBe(false);
+    expect(warded.is("viewer")).toBe(false);
   });
 });
 
 describe("stale", () => {
   it("reports false without a user or an expiry", async () => {
-    const crucible = defineCrucible(schema, fakeProvider());
-    expect(crucible.stale).toBe(false);
+    const warded = defineWard(schema, fakeProvider());
+    expect(warded.stale).toBe(false);
 
-    await crucible.resolve();
-    expect(crucible.stale).toBe(false);
+    await warded.resolve();
+    expect(warded.stale).toBe(false);
   });
 
   it("reports staleness from expires without acting on it", async () => {
@@ -356,22 +356,22 @@ describe("stale", () => {
         state.current = { ...ada(), expires: Date.now() - 1000 };
       }),
     });
-    const crucible = defineCrucible(schema, provider);
-    await crucible.resolve();
+    const warded = defineWard(schema, provider);
+    await warded.resolve();
 
-    expect(crucible.stale).toBe(true);
-    expect(crucible.authenticated).toBe(true);
+    expect(warded.stale).toBe(true);
+    expect(warded.authenticated).toBe(true);
   });
 });
 
 describe("on", () => {
   it("stops delivering after unsubscribe", async () => {
-    const crucible = defineCrucible(schema, fakeProvider());
+    const warded = defineWard(schema, fakeProvider());
     const onChange = vi.fn();
-    const off = crucible.on("change", onChange);
+    const off = warded.on("change", onChange);
 
     off();
-    await crucible.resolve();
+    await warded.resolve();
     expect(onChange).not.toHaveBeenCalled();
   });
 });

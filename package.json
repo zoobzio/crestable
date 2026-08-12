@@ -1,5 +1,5 @@
 {
-  "name": "@crucible/monorepo",
+  "name": "@warded/monorepo",
   "private": true,
   "packageManager": "pnpm@10.27.0",
   "scripts": {

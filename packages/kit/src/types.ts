@@ -1,4 +1,4 @@
-import type { Contract, Meta, Schema, User } from "@crucible/schema";
+import type { Contract, Meta, Schema, User } from "@warded/schema";
 
 /**
  * A step in a mutation path: the member keys walked from the user root down
@@ -15,7 +15,7 @@ export type Node = Record<string, unknown>;
 /**
  * The state container the service and its provider share. The service owns
  * it; provider callbacks receive it and assign `current` — the channel by
- * which a provider hands crucible what it needs.
+ * which a provider hands warded what it needs.
  */
 export interface State<C extends Contract> {
   current: User<Meta<C>> | null;
@@ -32,10 +32,10 @@ export type Bridge<Payload, C extends Contract> = (
 ) => User<Meta<C>>;
 
 /**
- * The interaction contract between crucible and an authentication service.
- * Crucible never implements authentication — a provider wraps a particular
+ * The interaction contract between warded and an authentication service.
+ * Ward never implements authentication — a provider wraps a particular
  * auth API (Auth0, a homegrown JWT backend, …) as a set of callbacks over
- * crucible's own domain objects. Each callback receives the shared state and
+ * warded's own domain objects. Each callback receives the shared state and
  * the schema — the validation bundle for proving vendor payloads at the
  * boundary; everything else a flow needs — configuration, credentials,
  * request context — is the provider's own, acquired in its own domain.

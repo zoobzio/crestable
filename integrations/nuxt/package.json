@@ -1,9 +1,9 @@
 {
-  "name": "@crucible/nuxt",
+  "name": "@warded/nuxt",
   "version": "0.0.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/zoobzio/crucible.git",
+    "url": "git+https://github.com/zoobzio/warded.git",
     "directory": "integrations/nuxt"
   },
   "type": "module",
@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "@nuxt/kit": "^4.4.6",
-    "crucible": "workspace:*",
+    "warded": "workspace:*",
     "h3": "^1.15.11"
   },
   "devDependencies": {

@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
-import type { Meta, User } from "crucible";
-import type { Provider } from "crucible/kit";
+import type { Meta, User } from "warded";
+import type { Provider } from "warded/kit";
 import type { H3Event } from "h3";
-import { SchemaError, defineSchema } from "crucible";
+import { SchemaError, defineSchema } from "warded";
 
 // The handler only uses these three h3 helpers; stub them so the dispatcher
 // can be driven with a plain fake event. `defineEventHandler` becomes
@@ -14,7 +14,7 @@ vi.mock("h3", () => ({
     Object.assign(new Error(opts.statusMessage), opts),
 }));
 
-import { defineCrucibleHandlers } from "../../src/server/handlers";
+import { defineWardHandlers } from "../../src/server/handlers";
 
 const schema = defineSchema({
   scopes: ["docs:read"],
@@ -52,7 +52,7 @@ function handlers(provider: Provider<C>) {
   const construct = vi.fn(() => provider);
   // The h3 mock makes defineEventHandler identity, so the handler is
   // callable directly with a fake event.
-  const handle = defineCrucibleHandlers(
+  const handle = defineWardHandlers(
     schema,
     construct as unknown as (event: H3Event) => Provider<C>,
   ) as unknown as (event: FakeEvent) => Promise<unknown>;
@@ -63,7 +63,7 @@ function event(action: string): FakeEvent {
   return { params: { action } };
 }
 
-describe("defineCrucibleHandlers", () => {
+describe("defineWardHandlers", () => {
   it("constructs the provider per request with the event", async () => {
     const { handle, construct } = handlers(fakeProvider());
 

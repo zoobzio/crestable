@@ -1,9 +1,9 @@
 {
-  "name": "@crucible/schema",
+  "name": "@warded/schema",
   "version": "0.0.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/zoobzio/crucible.git",
+    "url": "git+https://github.com/zoobzio/warded.git",
     "directory": "packages/schema"
   },
   "type": "module",

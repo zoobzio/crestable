@@ -1,9 +1,9 @@
 ---
-"@crucible/nuxt": minor
-"@crucible/core": minor
-"crucible": minor
-"@crucible/kit": minor
-"@crucible/schema": minor
+"@warded/nuxt": minor
+"@warded/core": minor
+"warded": minor
+"@warded/kit": minor
+"@warded/schema": minor
 ---
 
 first alpha release

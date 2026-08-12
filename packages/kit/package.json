@@ -1,9 +1,9 @@
 {
-  "name": "@crucible/kit",
+  "name": "@warded/kit",
   "version": "0.0.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/zoobzio/crucible.git",
+    "url": "git+https://github.com/zoobzio/warded.git",
     "directory": "packages/kit"
   },
   "type": "module",
@@ -26,7 +26,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@crucible/schema": "workspace:*",
+    "@warded/schema": "workspace:*",
     "objectively": "^0.1.1"
   }
 }

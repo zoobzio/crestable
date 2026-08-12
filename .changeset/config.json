@@ -1,17 +1,11 @@
 {
   "$schema": "https://unpkg.com/@changesets/config@3.1.1/schema.json",
-  "changelog": ["@changesets/changelog-github", { "repo": "zoobzio/crucible" }],
+  "changelog": ["@changesets/changelog-github", { "repo": "zoobzio/warded" }],
   "commit": false,
   "access": "public",
   "baseBranch": "main",
   "fixed": [
-    [
-      "crucible",
-      "@crucible/core",
-      "@crucible/kit",
-      "@crucible/schema",
-      "@crucible/nuxt"
-    ]
+    ["warded", "@warded/core", "@warded/kit", "@warded/schema", "@warded/nuxt"]
   ],
   "linked": [],
   "updateInternalDependencies": "patch",
