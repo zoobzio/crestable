@@ -1,0 +1,12 @@
+{
+  "mode": "pre",
+  "tag": "alpha",
+  "initialVersions": {
+    "@crucible/nuxt": "0.0.0",
+    "@crucible/core": "0.0.0",
+    "crucible": "0.0.0",
+    "@crucible/kit": "0.0.0",
+    "@crucible/schema": "0.0.0"
+  },
+  "changesets": []
+}
