@@ -17,6 +17,10 @@
     "./kit": {
       "types": "./.dist/kit.d.ts",
       "import": "./.dist/kit.mjs"
+    },
+    "./config": {
+      "types": "./.dist/config.d.ts",
+      "import": "./.dist/config.mjs"
     }
   },
   "files": [

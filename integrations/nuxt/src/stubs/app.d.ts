@@ -1,9 +1,9 @@
 // Typecheck-only stub for the Nuxt `#app` virtual module.
-import type { AppCrest } from "../runtime/types";
+import type { AppAuth } from "../runtime/types";
 
-/** The Nuxt app instance. `$crestable` is added by the crestable runtime. */
+/** The Nuxt app instance. `$auth` is added by the crestable runtime. */
 export interface NuxtApp {
-  $crestable: AppCrest;
+  $auth: AppAuth;
 }
 
 interface NuxtPluginDef {
@@ -20,3 +20,32 @@ interface NuxtPluginDef {
 export declare function defineNuxtPlugin(plugin: NuxtPluginDef): NuxtPluginDef;
 
 export declare function useNuxtApp(): NuxtApp;
+
+/** Page metadata. The crestable runtime augments this with `auth`. */
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type -- merge target
+export interface PageMeta {}
+
+/** The slice of a route location the middleware touches. */
+export interface RouteLocation {
+  fullPath: string;
+  meta: PageMeta;
+}
+
+type RouteMiddleware = (
+  to: RouteLocation,
+  from: RouteLocation,
+) => void | Promise<void> | ReturnType<typeof navigateTo>;
+
+export declare function defineNuxtRouteMiddleware(
+  middleware: RouteMiddleware,
+): RouteMiddleware;
+
+export declare function navigateTo(to: {
+  path: string;
+  query?: Record<string, string>;
+}): Promise<void>;
+
+export declare function createError(input: {
+  statusCode: number;
+  statusMessage?: string;
+}): Error;

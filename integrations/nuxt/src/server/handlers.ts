@@ -8,8 +8,9 @@ import { createError, defineEventHandler, getRouterParam } from "h3";
 /**
  * Turn a schema and a per-request provider constructor into the server
  * endpoints the browser transport talks to. The user drops one file into
- * their Nitro server — `server/api/_crestable/[action].ts` — whose default
- * export is `defineCrestHandlers(schema, (event) => provider)`.
+ * their Nitro server at the path matching the module's `prefix` option —
+ * `server/api/auth/[action].ts` for the default `/api/auth` — whose default
+ * export is `defineAuthHandlers(schema, (event) => provider)`.
  *
  * The constructor runs once per request with the h3 event: the event is the
  * provider's own domain — cookies, headers, body, everything a flow needs —
@@ -26,7 +27,7 @@ import { createError, defineEventHandler, getRouterParam } from "h3";
  * The auth host never reaches the browser, which only ever sees these
  * routes.
  */
-export const defineCrestHandlers = <C extends Contract>(
+export const defineAuthHandlers = <C extends Contract>(
   schema: Schema<C>,
   provider: (event: H3Event) => Provider<C>,
 ): EventHandler => {

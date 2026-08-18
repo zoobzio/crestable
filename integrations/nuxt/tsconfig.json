@@ -8,6 +8,7 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "paths": {
+      "vue": ["./src/stubs/vue.d.ts"],
       "#app": ["./src/stubs/app.d.ts"],
       "#imports": ["./src/stubs/imports.d.ts"],
       "#build/crestable.mjs": ["./src/stubs/build/crestable.d.mts"],

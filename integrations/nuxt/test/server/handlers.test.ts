@@ -14,7 +14,7 @@ vi.mock("h3", () => ({
     Object.assign(new Error(opts.statusMessage), opts),
 }));
 
-import { defineCrestHandlers } from "../../src/server/handlers";
+import { defineAuthHandlers } from "../../src/server/handlers";
 
 const schema = defineSchema({
   scopes: ["docs:read"],
@@ -52,7 +52,7 @@ function handlers(provider: Provider<C>) {
   const construct = vi.fn(() => provider);
   // The h3 mock makes defineEventHandler identity, so the handler is
   // callable directly with a fake event.
-  const handle = defineCrestHandlers(
+  const handle = defineAuthHandlers(
     schema,
     construct as unknown as (event: H3Event) => Provider<C>,
   ) as unknown as (event: FakeEvent) => Promise<unknown>;
@@ -63,7 +63,7 @@ function event(action: string): FakeEvent {
   return { params: { action } };
 }
 
-describe("defineCrestHandlers", () => {
+describe("defineAuthHandlers", () => {
   it("constructs the provider per request with the event", async () => {
     const { handle, construct } = handlers(fakeProvider());
 

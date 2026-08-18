@@ -5,3 +5,5 @@ export const contract = {
   roles: ["editor", "admin"],
   meta: { plan: ["free", "pro"] },
 };
+export const prefix = "/api/auth";
+export const login = "/login";

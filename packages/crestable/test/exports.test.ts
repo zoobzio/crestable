@@ -1,12 +1,38 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, expectTypeOf, it } from "vitest";
 import type { Provider } from "../src/kit";
 import { defineCrest, defineSchema } from "../src/index";
+import { defineCrestableConfig } from "../src/config";
 import { defineProvider, defineState } from "../src/kit";
 
 describe("crestable", () => {
   it("exposes the consumer surface at the root", () => {
     expect(defineCrest).toBeTypeOf("function");
     expect(defineSchema).toBeTypeOf("function");
+  });
+
+  it("exposes the declaration helper at ./config", () => {
+    expect(defineCrestableConfig).toBeTypeOf("function");
+  });
+
+  it("declares a contract with its literals pinned", () => {
+    const contract = {
+      scopes: ["docs:read"],
+      roles: ["editor"],
+      meta: { plan: ["free", "pro"] },
+    } as const;
+
+    // Identity at runtime: the contract stays plain, serializable data.
+    expect(defineCrestableConfig(contract)).toBe(contract);
+
+    // No `as const` needed: the const type parameter pins the literals.
+    const declared = defineCrestableConfig({
+      scopes: ["docs:read"],
+      roles: ["editor"],
+      meta: { plan: ["free", "pro"] },
+    });
+    expectTypeOf(declared.scopes).toEqualTypeOf<readonly ["docs:read"]>();
+    expectTypeOf(declared.roles).toEqualTypeOf<readonly ["editor"]>();
+    expectTypeOf(declared.meta.plan).toEqualTypeOf<readonly ["free", "pro"]>();
   });
 
   it("exposes the provider surface at ./kit", () => {

@@ -9,6 +9,9 @@ The umbrella package — the only thing consumers and integrations install.
 - **`crestable/kit`**: the provider surface — `defineProvider`,
   `defineState`, and the `Provider`/`State`/`Bridge` contracts, re-exported
   from [`@crestable/kit`](../kit).
+- **`crestable/config`**: the declaration surface — `defineCrestableConfig`,
+  an identity helper that pins a contract's literals without `as const`, for
+  the one shared file the contract is declared in.
 
 ```ts
 import { defineCrest, defineSchema } from "crestable";

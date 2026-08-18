@@ -12,6 +12,7 @@ export default defineBuildConfig({
   outDir: ".dist",
   declaration: true,
   externals: [
+    "vue",
     "#app",
     "#imports",
     "#build/crestable.mjs",

@@ -1,4 +1,5 @@
 import type { AppContract } from "#build/types/crestable.d.ts";
+import type { AuthRequirements } from "./guard";
 import type { Crest } from "crestable";
 
 /**
@@ -8,13 +9,23 @@ import type { Crest } from "crestable";
 export type { AppContract };
 
 /**
- * The service provided on the Nuxt app as `$crestable`, typed by the app's
+ * The auth service provided on the Nuxt app as `$auth`, typed by the app's
  * own contract: scopes, roles, and meta all carry their declared literals.
  */
-export type AppCrest = Crest<AppContract>;
+export type AppAuth = Crest<AppContract>;
+
+/**
+ * The `auth` page-meta entry the middleware reads, typed by the app's own
+ * contract: an undeclared scope or role fails to compile.
+ */
+export type AppAuthRequirements = AuthRequirements<AppContract>;
 
 declare module "#app" {
   interface NuxtApp {
-    $crestable: AppCrest;
+    $auth: AppAuth;
+  }
+
+  interface PageMeta {
+    auth?: AppAuthRequirements;
   }
 }

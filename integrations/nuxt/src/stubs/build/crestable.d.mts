@@ -3,3 +3,5 @@
 import type { AppContract } from "./types/crestable";
 
 export declare const contract: AppContract;
+export declare const prefix: string;
+export declare const login: string;

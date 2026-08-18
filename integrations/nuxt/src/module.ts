@@ -6,6 +6,7 @@ import { defineSchema } from "crestable";
 import {
   addImports,
   addPlugin,
+  addRouteMiddleware,
   addServerImports,
   addTemplate,
   addTypeTemplate,
@@ -13,12 +14,30 @@ import {
   defineNuxtModule,
 } from "@nuxt/kit";
 
+import { DEFAULT_LOGIN, DEFAULT_PREFIX } from "./constant";
+
 /**
  * The module's configuration: the app's contract, the one declaration both
- * sides of the wire derive their schema from.
+ * sides of the wire derive their schema from, and the route prefix the
+ * browser transport dials.
  */
 export interface ModuleOptions {
   contract?: Contract;
+  /**
+   * The route prefix the auth endpoints live under. The `defineAuthHandlers`
+   * route file must sit at the matching Nitro path — for the default
+   * `/api/auth`, that is `server/api/auth/[action].ts`.
+   *
+   * @default "/api/auth"
+   */
+  prefix?: string;
+  /**
+   * The route the `auth` middleware sends unauthenticated visitors to. The
+   * middleware appends the attempted path as a `redirect` query parameter.
+   *
+   * @default "/login"
+   */
+  login?: string;
 }
 
 /**
@@ -36,15 +55,16 @@ const tuple = (values: readonly string[]): string =>
  * Nuxt module for crestable.
  *
  * At build time it validates the configured contract by deriving a schema
- * from it, writes the contract to the `crestable.mjs` build template, and
- * derives the `AppContract` literal type into the `types/crestable.d.ts`
- * type template — so the runtime service, the composable, and the server
- * handlers all speak the app's own vocabulary. It registers the runtime
- * plugin (which builds the `$crestable` service and resolves the user during
- * SSR), auto-imports `useCrest` in the app, and auto-imports
- * `defineCrestHandlers` in the Nitro server. The user writes two things:
+ * from it, writes the contract and route prefix to the `crestable.mjs`
+ * build template, and derives the `AppContract` literal type into the
+ * `types/crestable.d.ts` type template — so the runtime service, the
+ * composables, and the server handlers all speak the app's own vocabulary.
+ * It registers the runtime plugin (which builds the `$auth` service and
+ * resolves the user during SSR), the named `auth` route middleware,
+ * auto-imports `useAuth` and `useUser` in the app, and auto-imports
+ * `defineAuthHandlers` in the Nitro server. The user writes two things:
  * their provider, and the one route file that hands it to
- * `defineCrestHandlers`.
+ * `defineAuthHandlers`.
  */
 const module: NuxtModule<ModuleOptions> = defineNuxtModule<ModuleOptions>({
   meta: {
@@ -64,10 +84,29 @@ const module: NuxtModule<ModuleOptions> = defineNuxtModule<ModuleOptions>({
     // Fail fast on a malformed contract: deriving the schema proves it.
     defineSchema(contract);
 
+    const prefix = (options.prefix ?? DEFAULT_PREFIX).replace(/\/+$/, "");
+    if (!prefix.startsWith("/")) {
+      throw new Error(
+        `crestable: \`crestable.prefix\` must start with "/" — got "${prefix}".`,
+      );
+    }
+
+    const login = options.login ?? DEFAULT_LOGIN;
+    if (!login.startsWith("/")) {
+      throw new Error(
+        `crestable: \`crestable.login\` must start with "/" — got "${login}".`,
+      );
+    }
+
     addTemplate({
       filename: "crestable.mjs",
       write: true,
-      getContents: () => `export const contract = ${JSON.stringify(contract)};`,
+      getContents: () =>
+        [
+          `export const contract = ${JSON.stringify(contract)};`,
+          `export const prefix = ${JSON.stringify(prefix)};`,
+          `export const login = ${JSON.stringify(login)};`,
+        ].join("\n"),
     });
 
     addTemplate({
@@ -77,6 +116,8 @@ const module: NuxtModule<ModuleOptions> = defineNuxtModule<ModuleOptions>({
         [
           `import type { AppContract } from "./types/crestable";`,
           `export declare const contract: AppContract;`,
+          `export declare const prefix: string;`,
+          `export declare const login: string;`,
         ].join("\n"),
     });
 
@@ -104,14 +145,25 @@ const module: NuxtModule<ModuleOptions> = defineNuxtModule<ModuleOptions>({
 
     addPlugin(resolver.resolve("./runtime/plugin"));
 
-    addImports({
-      name: "useCrest",
-      from: resolver.resolve("./runtime/composable"),
+    addRouteMiddleware({
+      name: "auth",
+      path: resolver.resolve("./runtime/middleware/auth"),
     });
+
+    addImports([
+      {
+        name: "useAuth",
+        from: resolver.resolve("./runtime/composable"),
+      },
+      {
+        name: "useUser",
+        from: resolver.resolve("./runtime/composable"),
+      },
+    ]);
 
     addServerImports([
       {
-        name: "defineCrestHandlers",
+        name: "defineAuthHandlers",
         from: resolver.resolve("./server/handlers"),
       },
     ]);
