@@ -8,9 +8,5 @@
     "@crestable/kit": "0.0.0",
     "@crestable/schema": "0.0.0"
   },
-  "changesets": [
-    "brave-crests-guard",
-    "jolly-frogs-strive",
-    "witty-configs-declare"
-  ]
+  "changesets": []
 }
